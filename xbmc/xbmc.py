@@ -137,16 +137,16 @@ def makeLegalFilename(filename, fatX=None):
 	"""Returns a legal filename or path as a string."""
 	return ""
 
-def translatePath(path):
+def translatePath(path, asURL=False):
 	"""Returns the translated path."""
 	try:
 		protocol, nil, loc, path = path.split('/', 3)
 		if protocol == 'special:' and loc in _special:
-			return os.path.join(_special[loc], path)
+			return 'file://' if asURL else '' + os.path.join(_special[loc], path)
 		if protocol == 'plugin:':
 			dir = os.path.join(_special['home'], 'addons', loc)
 			if os.path.isdir(dir):
-				return dir
+				return 'file://' if asURL else '' + os.path.join(dir, path)
 #			xml = os.path.join(dir, 'addon.xml')
 #			if os.path.isfile(xml):
 #				addon = ElementTree()

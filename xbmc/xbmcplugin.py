@@ -132,21 +132,31 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	name = name + "" if stack < 1 else " %d" % stack
 	
 	if url.startswith('rtmp'):
-		live = True if url.find(" live=true") > -1 else False
+		url = ('-r=' + url + ' ').replace('=1 ', '=true ')
 		swfVfy = True if url.find(" swfvfy=true") > -1 else False
-		url = url.replace(" playpath=", " -y=").replace(" swfurl=", " -W=" if swfVfy else " -s=").replace(" app=", " -a=").replace(" pageurl=", " -p=").replace(" swfvfy=true", " ").replace(" live=true", " ")
-		args = re.findall(r'(-\w)=(".*?"|\S+)', '-r=' + url)
-		url = "rtmpdump://rtmp2pms?" + ('-v&' if live else '') + urllib.urlencode(args)
-#		cmd = "rtmpdump " + ('-v ' if live else '') 
-#		for arg,val in args:
-#			cmd = cmd + '%s "%s"' % (arg,val)
-#		print "test cmd: %s\n" %  cmd
+		sargs = []
+		if url.find(" live=true") > -1:     sargs.append('-v')
+		if url.find(" playlist=true") > -1: sargs.append('-Y')
+		url = url \
+			.replace(" swfurl=",       " -W=" if swfVfy else " -s=") \
+			.replace(" playpath=",     " -y=") \
+			.replace(" app=",          " -a=") \
+			.replace(" pageurl=",      " -p=") \
+			.replace(" subscribe=",    " -d=") \
+			.replace(" swfvfy=true",   ""    ) \
+			.replace(" live=true",     ""    ) \
+			.replace(" playlist=true", ""    )
+		args = re.findall(r'(-\w)=(".*?"|\S+)', url)
+		url = "rtmpdump://rtmp2pms?" + urllib.urlencode(args) + '&' + '&'.join(sargs)
+		cmd = "rtmpdump " + ' '.join('%s "%s"' % arg for arg in args) + ' ' + ' '.join(sargs)
+		print "test cmd: %s\n" %  cmd
+
 	else:
-		url = unicode(url.split(' | ')[0])
+		url = url.split(' | ')[0]
 	
 	if url.startswith('plugin://'):
-#		dir = os.path.dirname(xbmc.translatePath(url.split('?')[0]))
-		dir = xbmc.translatePath(url.split('?')[0])
+		dir = os.path.dirname(xbmc.translatePath(url.split('?')[0]))
+#		dir = xbmc.translatePath(url.split('?')[0])
 		id, name, script, thumb, path = xbmcinit.read_addon(dir)
 		pms.setPath(path)
 		url = [script, url]
