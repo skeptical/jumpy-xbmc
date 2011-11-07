@@ -137,25 +137,19 @@ def makeLegalFilename(filename, fatX=None):
 	"""Returns a legal filename or path as a string."""
 	return ""
 
-def translatePath(path, asURL=False):
+def translatePath(url, asURL=False):
 	"""Returns the translated path."""
 	try:
-		protocol, nil, loc, path = path.split('/', 3)
+		protocol, nil, loc, path = url.split('/', 3)
 		if protocol == 'special:' and loc in _special:
-			return 'file://' if asURL else '' + os.path.join(_special[loc], path)
+			return ('file://' if asURL else '') + os.path.join(_special[loc], path)
 		if protocol == 'plugin:':
 			dir = os.path.join(_special['home'], 'addons', loc)
 			if os.path.isdir(dir):
-				return 'file://' if asURL else '' + os.path.join(dir, path)
-#			xml = os.path.join(dir, 'addon.xml')
-#			if os.path.isfile(xml):
-#				addon = ElementTree()
-#				addon.parse(xml)
-#				script = addon.find('.//extension[@point="xbmc.python.pluginsource"]').attrib['library']
-#				return os.path.join(dir, script)
+				return ('file://' if asURL else '') + os.path.join(dir, path)
 	except:
 		pass	
-	return path
+	return url
 
 def getCleanMovieTitle(path, usefoldername=None):
 	"""Returns a clean movie title and year string if available."""

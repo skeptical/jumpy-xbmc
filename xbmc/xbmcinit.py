@@ -2,6 +2,8 @@ import __builtin__, os, sys, traceback
 from xml.etree.ElementTree import ElementTree
 from xml.dom.minidom import parse
 
+version = 0.2
+
 # see http://wiki.xbmc.org/index.php?title=Special_protocol
 try: _special
 except NameError:
@@ -86,11 +88,4 @@ except NameError:
 				for node in tag.childNodes:
 					frags.append(node.data)
 				_addonstrings[tag.getAttribute('id')] = ''.join(frags)
-
-# some plugins seem to expect these to be preloaded
-#import xbmc
-#__builtin__.os = os
-#__builtin__.sys = sys
-#__builtin__.xbmc = xbmc
-
 

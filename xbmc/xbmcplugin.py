@@ -1,5 +1,6 @@
 import os, sys
 import urllib, re
+from urlparse import urlparse
 
 import jumpy, xbmcinit, xbmc
 
@@ -76,7 +77,7 @@ sys.argv.append(argv[0])
 sys.argv.append('0')
 sys.argv.append("" if len(argv) == 1 else "?" + argv[1])
 
-# added function
+# added functions
 
 def getMediaType(listitem):
 	itemtype = listitem.getProperty('type').strip().upper()
@@ -86,6 +87,16 @@ def getMediaType(listitem):
 		return PMS_AUDIO
 	else:
 		return PMS_UNRESOLVED
+
+def fullPath(base, path):
+#	print 'fullPath %s' % [base, path]
+	if path == None:
+		return None
+	if urlparse(path).scheme == "" and not os.path.isabs(path):
+		url = urlparse(base)
+		path = '%s://%s/%s' % (url.scheme, url.netloc, path) if url.scheme != ""  \
+			else os.path.join(os.path.dirname(base), path)
+	return xbmc.translatePath(path, False)
 
 # native xbmc functions
 
@@ -102,7 +113,7 @@ def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 			return True
 	pms.addItem(itemtype, listitem.getLabel(), 
 		[argv0, url] if itemtype < 0 else url, 
-		xbmc.translatePath(listitem.getProperty('thumbnailImage')))
+		fullPath(url, listitem.getProperty('thumbnailImage')))
 	return True
 
 def addDirectoryItems(handle, items, totalItems=None):
@@ -156,7 +167,6 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	
 	if url.startswith('plugin://'):
 		dir = os.path.dirname(xbmc.translatePath(url.split('?')[0]))
-#		dir = xbmc.translatePath(url.split('?')[0])
 		id, name, script, thumb, path = xbmcinit.read_addon(dir)
 		pms.setPath(path)
 		url = [script, url]
@@ -164,7 +174,7 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	else:
 		media = getMediaType(listitem)
 
-	pms.addItem(media, name, url, xbmc.translatePath(listitem.getProperty('thumbnailImage')))
+	pms.addItem(media, name, url, fullPath(url, listitem.getProperty('thumbnailImage')))
 	print "*** setResolvedUrl ***"
 	print "raw : %s" % listitem.getProperty('path')
 	print "name: %s" % name
