@@ -13,6 +13,8 @@ if len(sys.argv) == 1:
 	if not os.path.isdir(addonsdir):
 		print "Error: can't find xbmc addons dir at '%s'." % addonsdir
 		sys.exit(-1)
+	else:
+		print "found xbmc addons dir at '%s'.\n" % addonsdir
 	
 	for dir in os.listdir(addonsdir):
 		dir = os.path.join(addonsdir, dir)
