@@ -158,7 +158,7 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 			.replace(" live=true",     ""    ) \
 			.replace(" playlist=true", ""    )
 		args = re.findall(r'(-\w)=(".*?"|\S+)', url)
-		url = "rtmpdump://rtmp2pms?" + urllib.urlencode(args) + '&' + '&'.join(sargs)
+		url = "rtmpdump://rtmp2pms?" + urllib.urlencode(args) + (('&' + '&'.join(sargs)) if len(sargs) else '')
 		cmd = "rtmpdump " + ' '.join('%s "%s"' % arg for arg in args) + ' ' + ' '.join(sargs)
 		print "test cmd: %s\n" %  cmd
 
