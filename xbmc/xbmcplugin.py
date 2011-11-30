@@ -143,21 +143,40 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	name = name + "" if stack < 1 else " %d" % stack
 	
 	if url.startswith('rtmp'):
-		url = ('-r=' + url + ' ').replace('=1 ', '=true ')
-		swfVfy = True if url.find(" swfvfy=true") > -1 else False
 		sargs = []
-		if url.find(" live=true") > -1:     sargs.append('-v')
-		if url.find(" playlist=true") > -1: sargs.append('-Y')
-		url = url \
-			.replace(" swfurl=",       " -W=" if swfVfy else " -s=") \
-			.replace(" playpath=",     " -y=") \
-			.replace(" app=",          " -a=") \
-			.replace(" pageurl=",      " -p=") \
-			.replace(" subscribe=",    " -d=") \
-			.replace(" swfvfy=true",   ""    ) \
-			.replace(" live=true",     ""    ) \
-			.replace(" playlist=true", ""    )
-		args = re.findall(r'(-\w)=(".*?"|\S+)', url)
+		args = []
+		tups = re.findall(r' ([-\w]+)=(".*?"|\S+)', ' -r=' + url)
+		# see xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamRTMP.cpp:120
+		for key,tag in [
+				( "SWFPlayer", "swfUrl"),
+				( "PageURL",   "pageUrl"),
+				( "PlayPath",  "playpath"),
+				( "TcUrl",     "tcUrl"),
+				( "IsLive",    "live")
+			]:
+				try:
+					tups.append((tag, listitem.getProperty(key)))
+				except KeyError:
+					pass
+		swfVfy = True if url.lower().replace('=1', '=true').find(" swfvfy=true") > -1 else False
+		opts = {
+			'swfurl'    : '-W' if swfVfy else '-s',
+			'playpath'  : '-y',
+			'app'       : '-a',
+			'pageurl'   : '-p',
+			'tcurl'     : '-t',
+			'subscribe' : '-d',
+			'live'      : '-v',
+			'playlist'  : '-Y'
+		}
+		for key,val in tups:
+			if key.lower() in opts:
+				key = opts[key.lower()]
+			if val == '1' or val.lower() == 'true':
+				if key.lower() != 'swfvfy':
+					sargs.append(key)
+			else:
+				args.append((key,val))
 		url = "rtmpdump://rtmp2pms?" + urllib.urlencode(args) + (('&' + '&'.join(sargs)) if len(sargs) else '')
 		cmd = "rtmpdump " + ' '.join('%s "%s"' % arg for arg in args) + ' ' + ' '.join(sargs)
 		print "test cmd: %s\n" %  cmd
