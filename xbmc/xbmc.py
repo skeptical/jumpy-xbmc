@@ -1,6 +1,6 @@
 from xml.etree.ElementTree import ElementTree
 #import jumpy
-import xbmcplugin #, xbmcinit
+import xbmcplugin, xbmcgui #, xbmcinit
 
 # xbmc/interfaces/python/xbmcmodule/pyutil.h
 __author__ = "J. Mulder <darkie@xbmc.org>" # PY_XBMC_AUTHOR
@@ -184,6 +184,7 @@ class Player:
 
 	def play(self, item=None, listitem=None, windowed=None):
 		"""Play this item."""
+		print "**** play ****"
 		listitem.setProperty('path', item)
 		xbmcplugin.setResolvedUrl(0, True, listitem)
 
@@ -268,7 +269,7 @@ class Player:
 		pass
 
 	def getSubtitles(self):
-		"""get subtitle stream name\n"""
+		"""get subtitle stream name."""
 		pass
 
 	def showSubtitles(self, visible):
@@ -276,22 +277,97 @@ class Player:
 		pass
 
 	def DisableSubtitles(self):
-		"""disable subtitles\n"""
+		"""disable subtitles."""
 		pass
 
 	def getAvailableAudioStreams(self):
-		"""get Audio stream names\n"""
+		"""get Audio stream names."""
 		pass
 
 	def setAudioStream(self, stream):
-		"""set Audio Stream """
+		"""set Audio Stream."""
 		pass
 
 	def getAvailableSubtitleStreams(self):
-		"""get Subtitle stream names\n"""
+		"""get Subtitle stream names."""
 		pass
 
 	def setSubtitleStream(self, stream):
-		"""set Subtitle Stream """
+		"""set Subtitle Stream."""
+		pass
+
+# xbmc/interfaces/python/xbmcmodule/playlist.cpp
+class PlayListItem(xbmcgui.ListItem):
+
+	def __init__(self, url=None, listitem=None):
+		"""Creates a new PlaylistItem which can be added to a PlayList."""
+#		super(self)
+		if listitem is not None:
+			for key in listitem.__dict__.keys():
+				self.__dict__[key] = listitem.__dict__[key]
+		if url is not None:
+			self.__dict__['path'] = url
+			if self.__dict__['label'] is None:
+				self.__dict__['label'] = url
+
+	def getdescription(self):
+		"""Returns the description of this PlayListItem."""
+		return getLabel()
+
+	def getduration(self):
+		"""Returns the duration of this PlayListItem."""
+		return 0
+
+	def getfilename(self):
+		"""Returns the filename of this PlayListItem."""
+		return self.__dict__['path']
+
+class PlayList:
+
+	def __init__(self, type):
+		self.items = []
+		self.type = type
+	
+	def PlayList(self, playlist):
+		"""retrieve a reference from a valid xbmc playlist."""
+		pass
+
+	def add(self, url, listitem=None, index=None):
+		"""Adds a new file to the playlist."""
+		print "**** PlayList.add ****",url
+		item = PlayListItem(url, listitem)
+		if index is not None:
+			self.items.insert(index, item)
+		else:
+			self.items.append(PlayListItem(url, item))
+		xbmcplugin.setResolvedUrl(0, True, item, 0)
+
+	def load(self, filename):
+		"""Load a playlist."""
+		pass
+
+	def remove(self, filename):
+		"""remove an item with this filename from the playlist."""
+		print "**** PlayList.remove ****"
+		self.items.remove(filename)
+
+	def clear(self):
+		"""clear all items in the playlist."""
+		self.items = []
+
+	def shuffle(self):
+		"""shuffle the playlist."""
+		pass
+
+	def unshuffle(self):
+		"""unshuffle the playlist."""
+		pass
+
+	def size(self):
+		"""returns the total number of PlayListItems in this playlist."""
+		return len(self.items)
+
+	def getposition(self):
+		"""returns the position of the current song in this playlist."""
 		pass
 
