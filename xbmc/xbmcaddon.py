@@ -14,6 +14,10 @@ class Addon:
 	
 	def __init__(self, id):
 		self._id = id
+		self.info = {}
+		self.info['path'] = os.path.join(_special['home'], 'addons', self._id)
+		self.info['profile'] = os.path.join(_special['profile'], 'addon_data', self._id)
+		# TODO read addon.xml
 
 	def getLocalizedString(self, id):
 		"""Returns an addon's localized 'unicode string'."""
@@ -44,5 +48,6 @@ class Addon:
 			'fanart', 'icon', 'id', 'name', 'path', 'profile', 'stars', 'summary',
 			'type', 'version']
 		assert id in properties, '%s is not a valid property.' % id
-		return ''
+		return self.info[id] if id in self.info else ''
+
 

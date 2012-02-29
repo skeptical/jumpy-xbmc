@@ -2,7 +2,7 @@ import __builtin__, os, sys, traceback
 from xml.etree.ElementTree import ElementTree
 from xml.dom.minidom import parse
 
-version = '0.2.4'
+version = '0.2.5'
 
 # see http://wiki.xbmc.org/index.php?title=Special_protocol
 try: _special
