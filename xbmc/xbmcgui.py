@@ -54,7 +54,7 @@ class ListItem:
 
 	def setIconImage(self, icon):
 		"""Sets the listitem's icon image."""
-		self.__dict__['iconImage'] = iconImage
+		self.__dict__['iconImage'] = icon
 
 	def setThumbnailImage(self, thumb):
 		"""Sets the listitem's thumbnail image."""
@@ -135,4 +135,10 @@ class DialogProgress:
 		"""Close the progress dialog."""
 		pass
 
+# xbmc/interfaces/python/xbmcmodule/winxmldialog.cpp
+class WindowXMLDialog:
+	
+	def __init__(self, xmlFilename, scriptPath=None, defaultSkin=None, defaultRes=None):
+		"""Create a new WindowXMLDialog script."""
+		pass
 

@@ -196,7 +196,8 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	pms.addItem(media, name, url, fullPath(url, listitem.getProperty('thumbnailImage')))
 	print "*** setResolvedUrl ***"
 	print "raw : %s" % listitem.getProperty('path')
-	print "name: %s" % name
+	try: print "name: %s" % name
+	except UnicodeEncodeError: print "name: %s" % name.encode('ascii', 'ignore')
 	print "type: %d" % media
 	print "url :",url
 
