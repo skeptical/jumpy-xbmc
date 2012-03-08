@@ -109,4 +109,3 @@ except NameError:
 					frags.append(node.data)
 				_addonstrings[tag.getAttribute('id')] = ''.join(frags)
 
-

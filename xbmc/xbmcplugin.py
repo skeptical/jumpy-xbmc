@@ -5,9 +5,9 @@ from urlparse import urlparse
 import jumpy, xbmcinit, xbmc
 
 # some plugins seem to expect these to be preloaded
+# sys is already preloaded by jumpy
 import __builtin__
 __builtin__.os = os
-__builtin__.sys = sys
 __builtin__.xbmc = xbmc
 
 # xbmc/interfaces/python/xbmcmodule/pyutil.h

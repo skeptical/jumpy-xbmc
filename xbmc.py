@@ -36,12 +36,12 @@ if len(sys.argv) == 1:
 			id, name, script, thumb, path = xbmc.xbmcinit.read_addon(dir)
 			if id in disabled:
 				continue
+#			print 'found %s addon.' % name
 			pms.setPath(None)
 			pms.setPath(home)
 			if path != "":
 				pms.setPath(path)
 			pms.addItem(PMS_FOLDER, "[xbmc]   %s" % name, [script, 'plugin://' + id + '/'], thumb)
-			print 'found %s addon.' % name
 		except:
 			pass
 
