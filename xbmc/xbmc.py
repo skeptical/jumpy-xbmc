@@ -1,5 +1,5 @@
-from xml.etree.ElementTree import ElementTree
-#import jumpy
+import os.path
+from urlparse import urlparse
 import xbmcplugin, xbmcgui #, xbmcinit
 
 # xbmc/interfaces/python/xbmcmodule/pyutil.h
@@ -140,13 +140,16 @@ def makeLegalFilename(filename, fatX=None):
 def translatePath(url, asURL=False):
 	"""Returns the translated path."""
 	try:
-		protocol, nil, loc, path = url.split('/', 3)
-		if protocol == 'special:' and loc in _special:
-			return ('file://' if asURL else '') + os.path.join(_special[loc], path)
-		if protocol == 'plugin:':
+		scheme, loc, path, x, x, x = urlparse(url)
+#		print "scheme=%s loc=%s path=%s\nspecial[loc]=%s" % (scheme, loc, path,_special[loc])
+		if scheme == 'special' and loc in _special:
+			return ('file://' if asURL else '') \
+				+ os.path.join(_special[loc], os.path.normpath(path.lstrip('\\/')))
+		if scheme == 'plugin':
 			dir = os.path.join(_special['home'], 'addons', loc)
 			if os.path.isdir(dir):
-				return ('file://' if asURL else '') + os.path.join(dir, path)
+				return ('file://' if asURL else '') \
+					+ os.path.join(dir, os.path.normpath(path.lstrip('\\/')))
 	except:
 		pass	
 	return url
