@@ -4,7 +4,7 @@ from xml.etree.ElementTree import ElementTree, fromstring
 from xml.dom.minidom import parseString
 from xml.sax.saxutils import unescape
 
-version = '0.2.7'
+version = '0.2.8'
 
 # see http://wiki.xbmc.org/index.php?title=Special_protocol
 try: _special
@@ -12,14 +12,15 @@ except NameError:
 	__builtin__._special = {}
 	platform = sys.platform
 #	_special['xbmc'] = #TODO
+	home = os.getenv('xbmc_home') if 'xbmc_home' in os.environ else None
 	if platform.startswith('linux'):
-		_special['home'] = os.getenv('HOME') + '/.xbmc'
+		_special['home'] = home if home else os.getenv('HOME') + '/.xbmc'
 		_special['temp'] = _special['home'] + '/temp'
 	elif platform.startswith('win32'):
-		_special['home'] = os.getenv('APPDATA') + '\\XBMC'
+		_special['home'] = home if home else os.getenv('APPDATA') + '\\XBMC'
 		_special['temp'] = _special['home'] + '\\temp'
 	elif platform.startswith('darwin'):
-		_special['home'] = os.getenv('HOME') + '/Library/Application Support/XBMC'
+		_special['home'] = home if home else os.getenv('HOME') + '/Library/Application Support/XBMC'
 		_special['temp'] = os.getenv('HOME') + '.xbmc/temp'
 	mprofile = os.path.join(_special['home'], 'userdata')
 	_special['masterprofile'] = mprofile
