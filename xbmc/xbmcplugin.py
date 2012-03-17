@@ -233,7 +233,7 @@ def setPluginCategory(handle, category):
 	"""Sets the plugins name for skins to display."""
 	pass
 
-def setPluginFanart(handle, image, color1, color2, color3):
+def setPluginFanart(handle, image, color1=None, color2=None, color3=None):
 	"""Sets the plugins fanart and color for skins to display."""
 	pass
 

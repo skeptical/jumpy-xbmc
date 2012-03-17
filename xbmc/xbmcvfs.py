@@ -1,4 +1,5 @@
 import os, shutil
+from xbmc import translatePath
 
 def copy(source, destination):
 	"""Copy file to destination, returns true/false."""
