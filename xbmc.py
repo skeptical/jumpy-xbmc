@@ -7,7 +7,9 @@ import jumpy
 
 if len(sys.argv) == 1:
 	
-	conffile = os.path.join(pms.getProfileDir(),'xbmc.conf')
+	conffile = os.path.join(pms.getProfileDir(),'jumpy-xbmc.conf')
+	if not os.path.isfile(conffile):
+		conffile = os.path.join(pms.getProfileDir(),'xbmc.conf') # (backwards compatibility)
 	if os.path.isfile(conffile):
 		conf = ConfigParser()
 		conf.readfp(StringIO("[xbmc]\n" + open(conffile).read()))
