@@ -139,6 +139,7 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 		sys.exit(0)
 
 	name = listitem.getLabel()
+	if name == "" or name == None: name = pms.getFolderName()
 	if name == "" or name == None: name = "Item"
 	name = name + "" if stack < 1 else " %d" % stack
 	
