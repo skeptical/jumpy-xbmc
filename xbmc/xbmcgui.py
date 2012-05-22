@@ -71,6 +71,7 @@ class ListItem:
 	def setInfo(self, type, infoLabels):
 		"""Sets the listitem's infoLabels."""
 		self.__dict__['type'] = type
+		self.__dict__.update(infoLabels)
 		pass
 
 	def setProperty(self, key, value):
@@ -79,7 +80,7 @@ class ListItem:
 
 	def getProperty(self, key):
 		"""Returns a listitem property as a string, similar to an infolabel."""
-		return self.__dict__[key]
+		return (self.__dict__[key] if key in self.__dict__ else None)
 
 	def addContextMenuItems(self, items, replaceItems=None):
 		"""Adds item to the context menu for media lists."""

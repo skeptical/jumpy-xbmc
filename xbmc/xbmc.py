@@ -47,7 +47,9 @@ CAPTURE_FLAG_IMMEDIATELY = 2 # CAPTUREFLAG_IMMEDIATELY
 
 def log(msg, level=None):
 	"""Write a string to XBMC's log file."""
-	pass
+	print msg
+
+output = log # alias for backward compatility
 
 def shutdown():
 	"""Shutdown the xbox."""
@@ -183,13 +185,23 @@ class Player:
 
 	def __init__(self, core=None):
 		"""Creates a new Player with as default the xbmc music playlist."""
-		pass
+		self.playlist = None
 
 	def play(self, item=None, listitem=None, windowed=None):
 		"""Play this item."""
-		print "**** play ****"
-		listitem.setProperty('path', item)
-		xbmcplugin.setResolvedUrl(0, True, listitem)
+		print "**** play ****",item, listitem
+		if item is not None:
+			self.index = 0
+			if isinstance(item, PlayList):
+				self.playlist = item
+			else:
+				self.playlist = PlayList(PLAYLIST_VIDEO)
+				self.playlist.add(item, listitem)
+		elif self.playlist is not None:
+			self.index += 1
+		# pretend we played something in case 'self' is actually a derived class
+		try: self.onPlayBackEnded()
+		except: pass
 
 	def stop(self):
 		"""Stop playing."""
@@ -304,11 +316,10 @@ class PlayListItem(xbmcgui.ListItem):
 
 	def __init__(self, url=None, listitem=None):
 		"""Creates a new PlaylistItem which can be added to a PlayList."""
-#		super(self)
 		if listitem is not None:
-			for key in listitem.__dict__.keys():
-				self.__dict__[key] = listitem.__dict__[key]
-		if url is not None:
+			self.__dict__.update(listitem.__dict__)
+		# url is sometimes 'False'
+		if url is not None and url:
 			self.__dict__['path'] = url
 			if self.__dict__['label'] is None:
 				self.__dict__['label'] = url
@@ -337,13 +348,13 @@ class PlayList:
 
 	def add(self, url, listitem=None, index=None):
 		"""Adds a new file to the playlist."""
-		print "**** PlayList.add ****",url
+		print "**** PlayList.add ****", url, listitem.__dict__
 		item = PlayListItem(url, listitem)
 		if index is not None:
 			self.items.insert(index, item)
 		else:
 			self.items.append(PlayListItem(url, item))
-		xbmcplugin.setResolvedUrl(0, True, item, 0)
+		xbmcplugin.setResolvedUrl(0, True, item)
 
 	def load(self, filename):
 		"""Load a playlist."""

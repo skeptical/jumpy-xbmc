@@ -4,7 +4,7 @@ from xml.etree.ElementTree import ElementTree, fromstring
 from xml.dom.minidom import parseString
 from xml.sax.saxutils import unescape
 
-version = '0.2.9'
+version = '0.2.10'
 
 # see http://wiki.xbmc.org/index.php?title=Special_protocol
 try: _special
@@ -95,9 +95,11 @@ except NameError:
 #		_addon.parse('addon.xml')
 		_addon = ElementTree(fromstring(quickesc('addon.xml')))
 
+		_settings[u'theme'] = u'0'
 		id = _addon.getroot().attrib['id']
-		if not read_settings(os.path.join(_special['userdata'], 'addon_data', id, 'settings.xml')):
-			read_settings(os.path.join('resources', 'settings.xml'))
+		_settings[u'__xbmcaddonid__'] = id
+		read_settings(os.path.join('resources', 'settings.xml'))
+		read_settings(os.path.join(_special['userdata'], 'addon_data', id, 'settings.xml'))
 		print "Settings:", _settings
 
 		f = os.path.join('resources', 'language', 'English', 'strings.xml')

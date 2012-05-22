@@ -12,8 +12,8 @@ __platform__ = "XBOX" # PY_XBMC_PLATFORM
 # (with a little help from xbmcswift)
 class Addon:
 	
-	def __init__(self, id):
-		self._id = id
+	def __init__(self, id=None):
+		self._id = id if id else _settings[u'__xbmcaddonid__']
 		self.info = {}
 		self.info['path'] = os.path.join(_special['home'], 'addons', self._id)
 		self.info['profile'] = os.path.join(_special['profile'], 'addon_data', self._id)

@@ -98,6 +98,14 @@ def fullPath(base, path):
 			else os.path.join(os.path.dirname(base), path)
 	return xbmc.translatePath(path, False)
 
+# see xbmc/guilib/GUITextLayout.cpp::ParseText
+def striptags(label):
+	if label is not None:
+		return label.replace('[COLOR ', '[').replace('[/COLOR]', '') \
+			.replace('[B]', '').replace('[/B]', '') \
+			.replace('[I]', '').replace('[/I]', '')
+	return label
+
 # native xbmc functions
 
 def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
@@ -111,7 +119,7 @@ def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 			listitem.setProperty('path', url)
 			setResolvedUrl(handle, True, listitem, 0)
 			return True
-	pms.addItem(itemtype, listitem.getLabel(), 
+	pms.addItem(itemtype, striptags(listitem.getLabel()), 
 		[argv0, url] if itemtype < 0 else url, 
 		fullPath(url, listitem.getProperty('thumbnailImage')))
 	return True
@@ -128,6 +136,8 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 		return
 	
 	url = listitem.getProperty('path')
+	if url is None:
+		return
 	
 	# see xbmc/filesystem/StackDirectory.cpp
 	if url.startswith('stack://'):
@@ -138,7 +148,8 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 			ct += 1
 		sys.exit(0)
 
-	name = listitem.getLabel()
+	name = striptags(listitem.getLabel())
+	if name == "" or name == None: name = striptags(listitem.getProperty('title'))
 	if name == "" or name == None: name = pms.getFolderName()
 	if name == "" or name == None: name = "Item"
 	name = name + "" if stack < 1 else " %d" % stack
@@ -171,6 +182,8 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 			'playlist'  : '-Y'
 		}
 		for key,val in tups:
+			if val is None:
+				continue
 			if key.lower() in opts:
 				key = opts[key.lower()]
 			if val == '1' or val.lower() == 'true':
@@ -208,7 +221,6 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 def endOfDirectory(handle, succeeded=None, updateListing=None, cacheToDisc=None):
 	"""Callback function to tell XBMC that the end of the directory listing in a virtualPythonFolder is reached."""
 	print "*** endOfDirectory ***"
-	pass
 
 def addSortMethod(handle, sortMethod, label2=None):
 	"""Adds a sorting method for the media list."""
