@@ -11,7 +11,7 @@ __platform__ = "XBOX" # PY_XBMC_PLATFORM
 # xbmc/interfaces/python/xbmcmodule/PythonAddon.cpp
 # (with a little help from xbmcswift)
 class Addon:
-	
+
 	def __init__(self, id=None):
 		self._id = id if id else _settings[u'__xbmcaddonid__']
 		self.info = {}

@@ -153,7 +153,7 @@ def translatePath(url, asURL=False):
 				return ('file://' if asURL else '') \
 					+ os.path.join(dir, os.path.normpath(path.lstrip('\\/')))
 	except:
-		pass	
+		pass
 	return url
 
 def getCleanMovieTitle(path, usefoldername=None):
@@ -341,7 +341,7 @@ class PlayList:
 	def __init__(self, type):
 		self.items = []
 		self.type = type
-	
+
 	def PlayList(self, playlist):
 		"""retrieve a reference from a valid xbmc playlist."""
 		pass

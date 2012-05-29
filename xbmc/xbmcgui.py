@@ -138,7 +138,7 @@ class DialogProgress:
 
 # xbmc/interfaces/python/xbmcmodule/winxmldialog.cpp
 class WindowXMLDialog:
-	
+
 	def __init__(self, xmlFilename, scriptPath=None, defaultSkin=None, defaultRes=None):
 		"""Create a new WindowXMLDialog script."""
 		pass

@@ -57,7 +57,7 @@ def read_addon(dir, deps=None):
 		deps = {}
 		plugin=True
 	xml = os.path.join(dir, 'addon.xml')
-	
+
 	if os.path.isfile(xml):
 #		addon = ElementTree()
 #		addon.parse(xml)

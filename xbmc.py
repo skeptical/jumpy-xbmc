@@ -6,7 +6,7 @@ from ConfigParser import ConfigParser
 import jumpy
 
 if len(sys.argv) == 1:
-	
+
 	conffile = os.path.join(pms.getProfileDir(),'jumpy-xbmc.conf')
 	if not os.path.isfile(conffile):
 		conffile = os.path.join(pms.getProfileDir(),'xbmc.conf') # (backwards compatibility)
@@ -17,14 +17,14 @@ if len(sys.argv) == 1:
 			xbmc_home = conf.get('xbmc','xbmc_home')
 			pms.setEnv('xbmc_home', xbmc_home)
 			os.environ['xbmc_home'] = xbmc_home
-	
+
 	import xbmc.xbmcinit
 	print '\njumpy-xbmc version %s\n' % xbmc.xbmcinit.version
-	
+
 	home = os.path.join(os.path.split(sys.argv[0])[0], 'xbmc')
 	addonsdb = os.path.join(_special['home'], 'userdata', 'Database', 'Addons.db')
 	addonsdir = os.path.join(_special['home'], 'addons')
-	
+
 	disabled = []
 	try:
 		conn = sqlite3.connect(addonsdb)
@@ -42,7 +42,7 @@ if len(sys.argv) == 1:
 		sys.exit(-1)
 	else:
 		print "found xbmc addons dir at '%s'.\n" % addonsdir
-	
+
 	for dir in os.listdir(addonsdir):
 		dir = os.path.join(addonsdir, dir)
 		try:

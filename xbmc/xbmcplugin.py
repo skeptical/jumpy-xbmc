@@ -119,8 +119,8 @@ def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 			listitem.setProperty('path', url)
 			setResolvedUrl(handle, True, listitem, 0)
 			return True
-	pms.addItem(itemtype, striptags(listitem.getLabel()), 
-		[argv0, url] if itemtype < 0 else url, 
+	pms.addItem(itemtype, striptags(listitem.getLabel()),
+		[argv0, url] if itemtype < 0 else url,
 		fullPath(url, listitem.getProperty('thumbnailImage')))
 	return True
 
@@ -134,11 +134,11 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	"""Callback function to tell XBMC that the file plugin has been resolved to a url"""
 	if not succeeded:
 		return
-	
+
 	url = listitem.getProperty('path')
 	if url is None:
 		return
-	
+
 	# see xbmc/filesystem/StackDirectory.cpp
 	if url.startswith('stack://'):
 		ct = 0
@@ -153,7 +153,7 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	if name == "" or name == None: name = pms.getFolderName()
 	if name == "" or name == None: name = "Item"
 	name = name + "" if stack < 1 else " %d" % stack
-	
+
 	if url.startswith('rtmp'):
 		sargs = []
 		args = []
@@ -197,7 +197,7 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 
 	else:
 		url = url.split(' | ')[0]
-	
+
 	if url.startswith('plugin://'):
 		dir = os.path.dirname(xbmc.translatePath(url.split('?')[0]))
 		id, name, script, thumb, path = xbmcinit.read_addon(dir)
