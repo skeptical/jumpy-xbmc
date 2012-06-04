@@ -4,7 +4,7 @@ from xml.etree.ElementTree import ElementTree, fromstring
 from xml.dom.minidom import parseString
 from xml.sax.saxutils import unescape
 
-version = '0.2.10'
+version = '0.3.0'
 
 # see http://wiki.xbmc.org/index.php?title=Special_protocol
 try: _special
@@ -40,75 +40,90 @@ def quickesc(file):
 	# for some reason xbmc xml files allow unescaped ampersands
 	return unescape(open(file).read()).replace('&','&amp;')
 
-def read_settings(f):
-	if os.path.isfile(f):
-		print "Loading", f
-#		xml = parse(f)
-		xml = parseString(quickesc(f))
-		for tag in xml.getElementsByTagName('setting'):
-			val = tag.getAttribute('value') if tag.hasAttribute('value') else tag.getAttribute('default')
-			_settings[tag.getAttribute('id')] = val
-		return True
-	return False
-
-def read_addon(dir, deps=None):
-	plugin=False
-	if not deps:
-		deps = {}
-		plugin=True
-	xml = os.path.join(dir, 'addon.xml')
-
-	if os.path.isfile(xml):
-#		addon = ElementTree()
-#		addon.parse(xml)
-		addon = ElementTree(fromstring(quickesc(xml)))
-		script = None
-		if plugin:
-			try: script = addon.find('.//extension[@point="xbmc.python.pluginsource"]').attrib['library']
-			except AttributeError: return None
-		addonsdir = os.path.dirname(dir)
-		try:
-			# set any required lib deps
-			for mod in addon.findall('.//requires/import'):
-				dep = mod.attrib['addon']
-				if dep != 'xbmc.python' and not dep in deps:
-					deps[dep] = os.path.join(addonsdir, dep, 'lib')
-					# check for sub-deps
-					read_addon(os.path.join(addonsdir, dep), deps)
-			if plugin:
-				id = addon.getroot().attrib['id']
-				name = addon.getroot().attrib['name']
-				thumb = os.path.join(dir, 'icon.png')
-				script = os.path.join(dir, script)
-				return id, name, script, thumb, os.path.pathsep.join(deps.values())
-		except:
-			traceback.print_exc(file=sys.stdout)
-	return None
-
-try: _addon
-except NameError:
-	__builtin__._addon = ElementTree()
-	__builtin__._settings = {}
-	__builtin__._addonstrings = {}
-
-	if os.path.isfile('addon.xml'):
-#		_addon.parse('addon.xml')
-		_addon = ElementTree(fromstring(quickesc('addon.xml')))
-
-		_settings[u'theme'] = u'0'
-		id = _addon.getroot().attrib['id']
-		_settings[u'__xbmcaddonid__'] = id
-		read_settings(os.path.join('resources', 'settings.xml'))
-		read_settings(os.path.join(_special['userdata'], 'addon_data', id, 'settings.xml'))
-		print "Settings:", _settings
-
-		f = os.path.join('resources', 'language', 'English', 'strings.xml')
+def read_settings(id):
+	_settings[id] = {}
+	for f in [
+				os.path.join(_info[id]['path'], 'resources', 'settings.xml'),
+				os.path.join(_special['userdata'], 'addon_data', id, 'settings.xml')
+			]:
 		if os.path.isfile(f):
-#			xml = parse(f)
+			print "Reading", f
+			xml = parseString(quickesc(f))
+			for tag in xml.getElementsByTagName('setting'):
+				val = tag.getAttribute('value') if tag.hasAttribute('value') else tag.getAttribute('default')
+				_settings[id][tag.getAttribute('id')] = val
+
+def read_strings(id, lang):
+	_strings[id] = {}
+	for i in range(2):
+		f = os.path.join(_info[id]['path'], 'resources', 'language', lang, 'strings.xml')
+		if os.path.isfile(f):
+			print "Reading", f
 			xml = parseString(quickesc(f))
 			for tag in xml.getElementsByTagName('string'):
 				frags = []
 				for node in tag.childNodes:
 					frags.append(node.data)
-				_addonstrings[tag.getAttribute('id')] = ''.join(frags)
+				_strings[id][tag.getAttribute('id')] = ''.join(frags)
+			return
+		# sometimes it's 'english' instead of 'English'
+		lang = lang.lower()
+
+def read_addon(id=None, dir=None, full=True):
+
+	addonsdir = os.path.join(_special['home'], 'addons')
+	xml = os.path.join(dir or ('.' if id is None else os.path.join(addonsdir, id)), 'addon.xml')
+
+	if os.path.isfile(xml):
+		addon = ElementTree(fromstring(quickesc(xml)))
+		id = addon.getroot().attrib['id']
+		if not id in _info:
+			_info[id] = {}
+			_info[id]['name'] = addon.getroot().attrib['name']
+			_info[id]['path'] = os.path.dirname(xml)
+			_info[id]['profile'] = os.path.join(_special['profile'], 'addon_data', id)
+			_info[id]['icon'] = 'icon.png'
+#			paths = [_info[id]['path']]
+			paths = []
+			try:
+				_info[id]['_script'] = addon.find('.//extension[@point="xbmc.python.pluginsource"]').attrib['library']
+			except AttributeError:
+				try:
+					_info[id]['_lib'] = addon.find('.//extension[@point="xbmc.python.module"]').attrib['library']
+					paths = [os.path.join(addonsdir, id, _info[id]['_lib'])]
+				except KeyError:
+					# no 'library' means it's the top dir
+					paths = [_info[id]['path']]
+				except AttributeError:
+					return None
+			try:
+				# recurse through dep tree to gather PYTHONPATH
+				for mod in addon.findall('.//requires/import'):
+					dep = mod.attrib['addon']
+					if dep != 'xbmc.python' and not dep in paths:
+						read_addon(dir=os.path.join(addonsdir, dep), full=full)
+						paths.extend(_info[dep]['_pythonpath'].split(os.path.pathsep))
+				_info[id]['_pythonpath'] = os.path.pathsep.join(set(paths))
+			except:
+				traceback.print_exc(file=sys.stdout)
+
+		if full and not id in _settings:
+			read_settings(id)
+			read_strings(id, 'English')
+
+		return id
+	return None
+
+try: _settings
+except NameError:
+	__builtin__._settings = {}
+	__builtin__._strings = {}
+	__builtin__._info = {}
+	__builtin__._mainid = read_addon()
+
+	_settings['xbmc'] = {u'theme':u'0'}
+
+	if _mainid:
+		print ""
+		print "Settings:", _settings[_mainid]
 

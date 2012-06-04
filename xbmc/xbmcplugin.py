@@ -11,11 +11,11 @@ __builtin__.os = os
 __builtin__.xbmc = xbmc
 
 # xbmc/interfaces/python/xbmcmodule/pyutil.h
-__author__ = "J. Mulder <darkie@xbmc.org>" # PY_XBMC_AUTHOR
-__date__ = "20 August 2007"
-__version__ = "1.0"
-__credits__ = "XBMC TEAM." # PY_XBMC_CREDITS
-__platform__ = "XBOX" # PY_XBMC_PLATFORM
+#__author__ = "J. Mulder <darkie@xbmc.org>" # PY_XBMC_AUTHOR
+#__date__ = "20 August 2007"
+#__version__ = "1.0"
+#__credits__ = "XBMC TEAM." # PY_XBMC_CREDITS
+#__platform__ = "XBOX" # PY_XBMC_PLATFORM
 
 # xbmc/SortFileItem.h
 SORT_METHOD_NONE = 0
@@ -200,9 +200,10 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 
 	if url.startswith('plugin://'):
 		dir = os.path.dirname(xbmc.translatePath(url.split('?')[0]))
-		id, name, script, thumb, path = xbmcinit.read_addon(dir)
-		pms.setPath(path)
-		url = [script, url]
+		id = xbmcinit.read_addon(dir, full=False)
+		info = _info[id]
+		pms.setPath(info['_pythonpath'])
+		url = [os.path.join(info['path'], info['_script']), url]
 		media = PMS_UNRESOLVED
 	else:
 		media = getMediaType(listitem)
@@ -230,13 +231,13 @@ def addSortMethod(handle, sortMethod, label2=None):
 def getSetting(id, id2=None):
 	"""Returns the value of a setting as a string."""
 	try:
-		return _settings[id if id2 == None else id2]
+		return _settings[_mainid][id if id2 == None else id2]
 	except KeyError:
 		return ''
 
 def setSetting(handle, id, value):
 	"""Sets a plugin setting for the current running plugin."""
-	pass
+	_settings[_mainid][id] = value
 
 def setContent(handle, content):
 	"""Sets the plugins content."""

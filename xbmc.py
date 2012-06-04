@@ -46,15 +46,17 @@ if len(sys.argv) == 1:
 	for dir in os.listdir(addonsdir):
 		dir = os.path.join(addonsdir, dir)
 		try:
-			id, name, script, thumb, path = xbmc.xbmcinit.read_addon(dir)
+			id = xbmc.xbmcinit.read_addon(dir=dir, full=False)
 			if id in disabled:
 				continue
 #			print 'found %s addon.' % name
+			info = _info[id]
 			pms.setPath(None)
 			pms.setPath(home)
-			if path != "":
-				pms.setPath(path)
-			pms.addItem(PMS_FOLDER, "[xbmc]   %s" % name, [script, 'plugin://' + id + '/'], thumb)
+			pms.setPath(info['_pythonpath'])
+			script = os.path.join(info['path'], info['_script'])
+			thumb = os.path.join(info['path'], info['icon'])
+			pms.addItem(PMS_FOLDER, "[xbmc]   %s" % info['name'], [script, 'plugin://' + id + '/'], thumb)
 		except:
 			pass
 

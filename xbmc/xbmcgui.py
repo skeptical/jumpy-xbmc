@@ -1,9 +1,9 @@
 # xbmc/interfaces/python/xbmcmodule/pyutil.h
-__author__ = "J. Mulder <darkie@xbmc.org>" # PY_XBMC_AUTHOR
-__date__ = "14 July 2006"
-__version__ = "1.2"
-__credits__ = "XBMC TEAM." # PY_XBMC_CREDITS
-__platform__ = "XBOX" # PY_XBMC_PLATFORM
+#__author__ = "J. Mulder <darkie@xbmc.org>" # PY_XBMC_AUTHOR
+#__date__ = "14 July 2006"
+#__version__ = "1.2"
+#__credits__ = "XBMC TEAM." # PY_XBMC_CREDITS
+#__platform__ = "XBOX" # PY_XBMC_PLATFORM
 
 def getCurrentWindowId():
 	"""Returns the id for the current 'active' window as an integer."""
