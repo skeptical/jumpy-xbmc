@@ -7,21 +7,28 @@ import jumpy
 
 if len(sys.argv) == 1:
 
-	conffile = os.path.join(pms.getProfileDir(),'jumpy-xbmc.conf')
-	if not os.path.isfile(conffile):
-		conffile = os.path.join(pms.getProfileDir(),'xbmc.conf') # (backwards compatibility)
-	if os.path.isfile(conffile):
-		conf = ConfigParser()
-		conf.readfp(StringIO("[xbmc]\n" + open(conffile).read()))
-		if conf.has_option('xbmc','xbmc_home'):
-			xbmc_home = conf.get('xbmc','xbmc_home')
-			pms.setEnv('xbmc_home', xbmc_home)
-			os.environ['xbmc_home'] = xbmc_home
+	xbmc_home = pms.getProperty('xbmc.path')
+	if xbmc_home is None or xbmc_home == "": # (backwards compatibility, to be removed)
+		conffile = os.path.join(pms.getProfileDir(),'jumpy-xbmc.conf')
+		if not os.path.isfile(conffile):
+			conffile = os.path.join(pms.getProfileDir(),'xbmc.conf')
+		if os.path.isfile(conffile):
+			conf = ConfigParser()
+			conf.readfp(StringIO("[xbmc]\n" + open(conffile).read()))
+			if conf.has_option('xbmc','xbmc_home'):
+				xbmc_home = conf.get('xbmc', 'xbmc_home')
+				if xbmc_home != "" and xbmc_home is not None:
+					pms.setProperty('xbmc.path', xbmc_home)
+	if xbmc_home != "" and xbmc_home is not None:
+		print "xbmc_home=%s" % xbmc_home
+		pms.setEnv('xbmc_home', xbmc_home)
+		os.environ['xbmc_home'] = xbmc_home
 
 	import xbmc.xbmcinit
 	print '\njumpy-xbmc version %s\n' % xbmc.xbmcinit.version
 
-	home = os.path.join(os.path.split(sys.argv[0])[0], 'xbmc')
+	home = os.path.join(os.path.abspath(os.path.split(sys.argv[0])[0]), 'xbmc')
+	print "home=%s" % home
 	addonsdb = os.path.join(_special['home'], 'userdata', 'Database', 'Addons.db')
 	addonsdir = os.path.join(_special['home'], 'addons')
 
