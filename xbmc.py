@@ -29,20 +29,21 @@ if len(sys.argv) == 1:
 
 	home = os.path.join(os.path.abspath(os.path.split(sys.argv[0])[0]), 'xbmc')
 	print "home=%s" % home
-	addonsdb = os.path.join(_special['home'], 'userdata', 'Database', 'Addons.db')
+	addonsdb = os.path.join(_special['home'], 'userdata', 'Database', 'Addons15.db')
 	addonsdir = os.path.join(_special['home'], 'addons')
 
 	disabled = []
-	try:
-		conn = sqlite3.connect(addonsdb)
-		cursor = conn.cursor()
-		cursor.execute('SELECT addonID FROM disabled')
-		for row in cursor:
-			disabled.append(row[0])
+	if os.path.isfile(addonsdb):
+		try:
+			conn = sqlite3.connect(addonsdb)
+			cursor = conn.cursor()
+			cursor.execute('SELECT addonID FROM disabled')
+			for row in cursor:
+				disabled.append(row[0])
 #			print "disabled: %s" % row[0]
-		conn.close()
-	except sqlite3.Error, e:
-		print "%s: %s" % (addonsdb, e.args[0])
+			conn.close()
+		except sqlite3.Error, e:
+			print "%s: %s" % (addonsdb, e.args[0])
 
 	if not os.path.isdir(addonsdir):
 		print "Error: can't find xbmc addons dir at '%s'." % addonsdir
