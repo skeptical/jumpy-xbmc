@@ -1,13 +1,6 @@
 import os, os.path, sys
 import xbmcinit
 
-# xbmc/interfaces/python/xbmcmodule/pyutil.h
-#__author__ = "J. Mulder <darkie@xbmc.org>" # PY_XBMC_AUTHOR
-#__date__ = "1 May 2010"
-#__version__ = "1.0"
-#__credits__ = "XBMC TEAM." # PY_XBMC_CREDITS
-#__platform__ = "XBOX" # PY_XBMC_PLATFORM
-
 # xbmc/interfaces/python/xbmcmodule/PythonAddon.cpp
 # (with a little help from xbmcswift)
 class Addon:

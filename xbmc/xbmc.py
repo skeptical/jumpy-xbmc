@@ -2,13 +2,6 @@ import os.path
 from urlparse import urlparse
 import xbmcplugin, xbmcgui #, xbmcinit
 
-# xbmc/interfaces/python/xbmcmodule/pyutil.h
-__author__ = "J. Mulder <darkie@xbmc.org>" # PY_XBMC_AUTHOR
-__date__ = "15 November 2005"
-__version__ = "1.3"
-__credits__ = "XBMC TEAM." # PY_XBMC_CREDITS
-__platform__ = "XBOX" # PY_XBMC_PLATFORM
-
 # xbmc/PlayListPlayer.h
 PLAYLIST_NONE = -1
 PLAYLIST_MUSIC = 0

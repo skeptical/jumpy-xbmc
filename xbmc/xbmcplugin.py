@@ -10,13 +10,6 @@ import __builtin__
 __builtin__.os = os
 __builtin__.xbmc = xbmc
 
-# xbmc/interfaces/python/xbmcmodule/pyutil.h
-#__author__ = "J. Mulder <darkie@xbmc.org>" # PY_XBMC_AUTHOR
-#__date__ = "20 August 2007"
-#__version__ = "1.0"
-#__credits__ = "XBMC TEAM." # PY_XBMC_CREDITS
-#__platform__ = "XBOX" # PY_XBMC_PLATFORM
-
 # xbmc/SortFileItem.h
 SORT_METHOD_NONE = 0
 SORT_METHOD_LABEL = 1
