@@ -1,4 +1,4 @@
-import sys, os #, imp
+import sys, os, traceback #, imp
 import sqlite3 #, itertools
 from cStringIO import StringIO
 from ConfigParser import ConfigParser
@@ -65,6 +65,8 @@ if len(sys.argv) == 1:
 			script = os.path.join(info['path'], info['_script'])
 			thumb = os.path.join(info['path'], info['icon'])
 			pms.addItem(PMS_FOLDER, "[xbmc]   %s" % info['name'], [script, 'plugin://' + id + '/'], thumb)
-		except:
+		except KeyError:
 			pass
+		except:
+			traceback.print_exc(file=sys.stdout)
 
