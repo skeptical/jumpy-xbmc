@@ -59,9 +59,9 @@ if len(sys.argv) == 1:
 				continue
 #			print 'found %s addon.' % name
 			info = _info[id]
-			pms.setPath(None)
-			pms.setPath(home)
-			pms.setPath(info['_pythonpath'])
+			pms.addPath(None)
+			pms.addPath(home)
+			pms.addPath(info['_pythonpath'])
 			script = os.path.join(info['path'], info['_script'])
 			thumb = os.path.join(info['path'], info['icon'])
 			pms.addItem(PMS_FOLDER, "[xbmc]   %s" % info['name'], [script, 'plugin://' + id + '/'], thumb)

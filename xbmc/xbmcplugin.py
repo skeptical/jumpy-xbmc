@@ -195,7 +195,7 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 		dir = os.path.dirname(xbmc.translatePath(url.split('?')[0]))
 		id = xbmcinit.read_addon(dir, full=False)
 		info = _info[id]
-		pms.setPath(info['_pythonpath'])
+		pms.addPath(info['_pythonpath'])
 		url = [os.path.join(info['path'], info['_script']), url]
 		media = PMS_UNRESOLVED
 	else:
