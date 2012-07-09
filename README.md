@@ -11,7 +11,7 @@ This is a plugin for [PMS-Jumpy](https://github.com/skeptical/jumpy) which allow
 
 This plugin is included with [PMS-Jumpy](https://github.com/skeptical/jumpy), and doesn't usually need to be installed separately.  To update it manually
 
-* Download the [zip file]() and unzip it to `plugins/jumpy` in your PMS installation.
+* Download the [zip file](https://github.com/skeptical/jumpy-xbmc/zipball/master) and unzip it to `plugins/jumpy` in your PMS installation.
 * Restart PMS.
 
 # Usage  <a name="Usage"></a>
