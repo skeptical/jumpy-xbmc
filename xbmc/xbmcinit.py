@@ -1,25 +1,29 @@
-import __builtin__, os, sys, traceback
+import __builtin__, os, sys, platform, traceback
 from xml.etree.ElementTree import ElementTree, fromstring
 #from xml.dom.minidom import parse
 from xml.dom.minidom import parseString
 from xml.sax.saxutils import unescape
 
-version = '0.3.0'
+version = '0.3.1'
 
 # see http://wiki.xbmc.org/index.php?title=Special_protocol
 try: _special
 except NameError:
 	__builtin__._special = {}
-	platform = sys.platform
-#	_special['xbmc'] = #TODO
 	home = os.getenv('xbmc_home') if 'xbmc_home' in os.environ else None
-	if platform.startswith('linux'):
+	if sys.platform.startswith('linux'):
+		# FIXME: this won't find xbmc if it's installed to another prefix
+		_special['xbmc'] = ('/usr/local/share/xbmc' if os.path.exists('/usr/local/share/xbmc') \
+			else '/usr/share/xbmc')
 		_special['home'] = home if home else os.getenv('HOME') + '/.xbmc'
 		_special['temp'] = _special['home'] + '/temp'
-	elif platform.startswith('win32'):
+	elif sys.platform.startswith('win32'):
+		_special['xbmc'] = (os.getenv('ProgramFiles') if platform.release() == 'XP' \
+			else os.getenv('ProgramFiles(x86)')) + '\\XBMC'
 		_special['home'] = home if home else os.getenv('APPDATA') + '\\XBMC'
 		_special['temp'] = _special['home'] + '\\temp'
-	elif platform.startswith('darwin'):
+	elif sys.platform.startswith('darwin'):
+		_special['xbmc'] = '/Applications/XBMC.app/Contents/Resources/XBMC'
 		_special['home'] = home if home else os.getenv('HOME') + '/Library/Application Support/XBMC'
 		_special['temp'] = os.getenv('HOME') + '.xbmc/temp'
 	mprofile = os.path.join(_special['home'], 'userdata')
@@ -72,6 +76,7 @@ def read_strings(id, lang):
 def read_addon(id=None, dir=None, full=True):
 
 	addonsdir = os.path.join(_special['home'], 'addons')
+	xbmcaddonsdir = os.path.join(_special['xbmc'], 'addons')
 	xml = os.path.join(dir or ('.' if id is None else os.path.join(addonsdir, id)), 'addon.xml')
 
 	if os.path.isfile(xml):
@@ -83,14 +88,13 @@ def read_addon(id=None, dir=None, full=True):
 			_info[id]['path'] = os.path.dirname(xml)
 			_info[id]['profile'] = os.path.join(_special['profile'], 'addon_data', id)
 			_info[id]['icon'] = 'icon.png'
-#			paths = [_info[id]['path']]
 			paths = []
 			try:
 				_info[id]['_script'] = addon.find('.//extension[@point="xbmc.python.pluginsource"]').attrib['library']
 			except AttributeError:
 				try:
 					_info[id]['_lib'] = addon.find('.//extension[@point="xbmc.python.module"]').attrib['library']
-					paths = [os.path.join(addonsdir, id, _info[id]['_lib'])]
+					paths = [os.path.join(dir, _info[id]['_lib'])]
 				except KeyError:
 					# no 'library' means it's the top dir
 					paths = [_info[id]['path']]
@@ -101,7 +105,10 @@ def read_addon(id=None, dir=None, full=True):
 				for mod in addon.findall('.//requires/import'):
 					dep = mod.attrib['addon']
 					if dep != 'xbmc.python' and not dep in paths:
-						read_addon(dir=os.path.join(addonsdir, dep), full=full)
+						addondir = os.path.join(addonsdir, dep)
+						if not os.path.exists(addondir):
+							addondir = os.path.join(xbmcaddonsdir, dep)
+						read_addon(dir=addondir, full=full)
 						paths.extend(_info[dep]['_pythonpath'].split(os.path.pathsep))
 				_info[id]['_pythonpath'] = os.path.pathsep.join(set(paths))
 			except:

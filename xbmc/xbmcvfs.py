@@ -29,9 +29,39 @@ def exists(path):
 
 def mkdir(path):
 	"""Create a folder."""
-	os.mkdirs(translatePath(path))
+	os.mkdir(translatePath(path))
+
+def mkdirs(path):
+	"""mkdirs(path) -- Create folder(s) - it will create all folders in the path."""
+	os.makedirs(translatePath(path))
 
 def rmdir(path):
 	"""Remove a folder."""
 	shutil.rmtree(translatePath(path))
+
+def listdir(path):
+	"""listdir(path) -- lists content of a folder."""
+	return os.listdir(translatePath(path))
+
+class File:
+
+	def __init__(path, mode='r'):
+		self.path = translatePath(path);
+		self.file = open(self.path, mode)
+		return self.file
+
+	def read(n=-1):
+		return self.file.read(n)
+
+	def write(b):
+		return self.file.write(b)
+
+	def size():
+		return os.path.getsize(self.path)
+
+	def seek(offset, whence=0):
+		return self.file.seek(offset, whence)
+
+	def close():
+		self.file.close()
 
