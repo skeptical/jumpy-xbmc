@@ -136,3 +136,6 @@ class WindowXMLDialog:
 		"""Create a new WindowXMLDialog script."""
 		pass
 
+	def doModal(self):
+		pass
+
