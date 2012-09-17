@@ -11,19 +11,23 @@ try: _special
 except NameError:
 	__builtin__._special = {}
 	home = os.getenv('xbmc_home') if 'xbmc_home' in os.environ else None
+	main = os.getenv('xbmc_main') if 'xbmc_main' in os.environ else None
 	if sys.platform.startswith('linux'):
 		# FIXME: this won't find xbmc if it's installed to another prefix
-		_special['xbmc'] = ('/usr/local/share/xbmc' if os.path.exists('/usr/local/share/xbmc') \
+		_special['xbmc'] = main if main else \
+			('/usr/local/share/xbmc' if os.path.exists('/usr/local/share/xbmc') \
 			else '/usr/share/xbmc')
 		_special['home'] = home if home else os.getenv('HOME') + '/.xbmc'
 		_special['temp'] = _special['home'] + '/temp'
 	elif sys.platform.startswith('win32'):
-		_special['xbmc'] = (os.getenv('ProgramFiles') if platform.release() == 'XP' \
+		_special['xbmc'] = main if main else \
+			(os.getenv('ProgramFiles') if platform.release() == 'XP' \
 			else os.getenv('ProgramFiles(x86)')) + '\\XBMC'
 		_special['home'] = home if home else os.getenv('APPDATA') + '\\XBMC'
 		_special['temp'] = _special['home'] + '\\temp'
 	elif sys.platform.startswith('darwin'):
-		_special['xbmc'] = '/Applications/XBMC.app/Contents/Resources/XBMC'
+		_special['xbmc'] = main if main else \
+			'/Applications/XBMC.app/Contents/Resources/XBMC'
 		_special['home'] = home if home else os.getenv('HOME') + '/Library/Application Support/XBMC'
 		_special['temp'] = os.getenv('HOME') + '.xbmc/temp'
 	mprofile = os.path.join(_special['home'], 'userdata')

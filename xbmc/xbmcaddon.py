@@ -3,10 +3,20 @@ import xbmcinit
 
 # xbmc/interfaces/python/xbmcmodule/PythonAddon.cpp
 # (with a little help from xbmcswift)
+
 class Addon:
 
 	def __init__(self, id=None):
-		self._id = xbmcinit.read_addon(id)
+		xid = xbmcinit.read_addon(id)
+		if xid is not None:
+			self._id = xid
+		elif id is not None:
+			self._id = id
+			_info[self._id] = {}
+			_settings[self._id] = {}
+			_strings[self._id] = {}
+		else:
+			self._id = _settings[u'_mainid']
 		self.info = _info[self._id]
 		self.settings = _settings[self._id]
 		self.strings = _strings[self._id]
