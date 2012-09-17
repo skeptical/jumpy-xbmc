@@ -105,15 +105,18 @@ def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 	"""Callback function to pass directory contents back to XBMC."""
 #	print "rawurl=%s" % url
 	itemtype = PMS_FOLDER
+	script = argv0
 	if not isFolder:
 		if url.startswith('plugin://'):
+			id = urlparse(url).netloc
+			script = os.path.join(_info[id]['path'], _info[id]['_script'])
 			itemtype = PMS_UNRESOLVED
 		else:
 			listitem.setProperty('path', url)
 			setResolvedUrl(handle, True, listitem, 0)
 			return True
 	pms.addItem(itemtype, striptags(listitem.getLabel()),
-		[argv0, url] if itemtype < 0 else url,
+		[script, url] if itemtype < 0 else url,
 		fullPath(url, listitem.getProperty('thumbnailImage')))
 	return True
 
