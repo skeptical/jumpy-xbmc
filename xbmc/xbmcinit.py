@@ -79,6 +79,9 @@ def read_strings(id, lang):
 
 def read_addon(id=None, dir=None, full=True):
 
+	if id is not None and id in _info and _info[id] is not None:
+		return id
+
 	addonsdir = os.path.join(_special['home'], 'addons')
 	xbmcaddonsdir = os.path.join(_special['xbmc'], 'addons')
 	xml = os.path.join(dir or ('.' if id is None else os.path.join(addonsdir, id)), 'addon.xml')
@@ -103,6 +106,7 @@ def read_addon(id=None, dir=None, full=True):
 					# no 'library' means it's the top dir
 					paths = [_info[id]['path']]
 				except AttributeError:
+					_info[id] = None
 					return None
 			try:
 				# recurse through dep tree to gather PYTHONPATH
