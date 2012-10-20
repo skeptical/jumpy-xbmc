@@ -141,6 +141,13 @@ def rtmpsplit(url, listitem):
 	for key,val in tups:
 		if val is None:
 			continue
+#		# convert some '\hh' hex escapes
+#		val = val.replace('\\5c','\\').replace('\\20',' ') \
+#			.replace('\\22','\\"' if sys.platform.startswith('win32') else '"')
+		# convert all '\hh' hex escapes
+		val = literal_eval("'%s'" % val.replace('\\','\\x'))
+		if sys.platform.startswith('win32'):
+			val = val.replace('"', '\\"')
 		if key.lower() in opts:
 			key = opts[key.lower()]
 		if val == '1' or val.lower() == 'true':
