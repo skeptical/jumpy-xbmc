@@ -342,12 +342,16 @@ class PlayList:
 	def add(self, url, listitem=None, index=None):
 		"""Adds a new file to the playlist."""
 		print "**** PlayList.add ****", url, listitem.__dict__
-		item = PlayListItem(url, listitem)
-		if index is not None:
-			self.items.insert(index, item)
-		else:
-			self.items.append(PlayListItem(url, item))
-		xbmcplugin.setResolvedUrl(0, True, item)
+		if not isinstance(url, list):
+			url = [url]
+		for u in url:
+			item = PlayListItem(u, listitem)
+			if index is not None:
+				self.items.insert(index, item)
+				index += 1
+			else:
+				self.items.append(PlayListItem(u, item))
+			xbmcplugin.setResolvedUrl(0, True, item)
 
 	def load(self, filename):
 		"""Load a playlist."""
