@@ -139,3 +139,106 @@ class WindowXMLDialog:
 	def doModal(self):
 		pass
 
+class Window:
+
+	def __init__(self, windowId):
+		self.properties = {}
+		self.properties['windowId'] = windowId;
+
+	def addControl(self, control):
+		"""Add a Control to this window."""
+		pass
+
+	def addControls(self, controlList):
+		"""Add a list of Controls to this window."""
+		pass
+
+	def clearProperties(self):
+		"""Clears all window properties."""
+		self.properties = {}
+
+	def clearProperty(self, key):
+		"""Clears the specific window property."""
+		self.properties[key] = None
+
+	def close(self):
+		"""Closes this window."""
+		pass
+
+	def doModal(self):
+		"""Display this window until close() is called."""
+		pass
+
+	def getControl(self, controlId):
+		"""Get's the control from this window."""
+		pass
+
+	def getFocus(self, control):
+		"""returns the control which is focused."""
+		pass
+
+	def getFocusId(self):
+		"""returns the id of the control which is focused."""
+		return 0
+
+	def getHeight(self):
+		"""Returns the height of this screen."""
+		return 480
+
+	def getProperty(self, key):
+		"""Returns a window property as a string, similar to an infolabel."""
+		return self.properties[key] if key in self.properties else ''
+
+
+	def getResolution(self):
+		"""Returns the resolution of the screen. The returned value is one of the following:"""
+		return 5 # NTSC 16:9 (720x480)
+
+	def getWidth(self):
+		"""Returns the width of this screen."""
+		return 720
+
+	def onAction(self, action):
+		"""onAction method."""
+		pass
+
+	def onClick(self, control):
+		"""onClick method."""
+		pass
+
+	def onFocus(self, control):
+		"""onFocus method."""
+		pass
+
+	def onInit(self):
+		"""onInit method."""
+		pass
+
+	def removeControl(self, control):
+		"""Removes the control from this window."""
+		pass
+
+	def removeControls(self, controlList):
+		"""Removes a list of controls from this window."""
+		pass
+
+	def setCoordinateResolution(self, resolution):
+		"""Sets the resolution"""
+		pass
+
+	def setFocus(self, control):
+		"""Give the supplied control focus."""
+		pass
+
+	def setFocusId(self):
+		"""Gives the control with the supplied focus."""
+		pass
+
+	def setProperty(self, key, value):
+		"""Sets a window property, similar to an infolabel."""
+		self.properties[key] = value;
+
+	def show(self):
+		"""Show this window."""
+		pass
+
