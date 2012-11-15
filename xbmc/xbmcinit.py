@@ -106,6 +106,7 @@ def read_addon(id=None, dir=None, full=True):
 		if not id in _info:
 			_info[id] = {}
 			_info[id]['name'] = addon.getroot().attrib['name']
+			_info[id]['version'] = addon.getroot().attrib['version']
 			_info[id]['path'] = os.path.abspath(os.path.dirname(xml))
 			_info[id]['profile'] = os.path.join(_special['profile'], 'addon_data', id)
 			_info[id]['icon'] = 'icon.png'
