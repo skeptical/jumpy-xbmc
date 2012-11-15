@@ -48,6 +48,22 @@ def quickesc(file):
 	# for some reason xbmc xml files allow unescaped ampersands
 	return unescape(open(file).read()).replace('&','&amp;')
 
+def read_xbmc_settings():
+	_settings['xbmc'] = {}
+	_settings['xbmc'][u'theme'] = 0
+	lang = os.getenv('xbmc_lang')
+	if lang is None:
+		guisettings = os.path.join(_special['userdata'], 'guisettings.xml')
+		if os.path.isfile(guisettings):
+			print "Reading", guisettings
+			try:
+				xml = ElementTree(fromstring(quickesc(guisettings)))
+				lang = xml.find('./locale/language').text
+			except: pass
+		if lang is None: lang = 'English'
+		pms.setEnv('xbmc_lang', lang)
+	_settings['xbmc'][u'language'] = lang
+
 def read_settings(id):
 	_settings[id] = {}
 	for f in [
@@ -62,9 +78,9 @@ def read_settings(id):
 				_settings[id][tag.getAttribute('id')] = val
 
 def read_strings(id, lang):
-	_strings[id] = {}
-	for i in range(2):
-		f = os.path.join(_info[id]['path'], 'resources', 'language', lang, 'strings.xml')
+	# lang folder name is usually title case, sometimes lowercase
+	for l in [lang, lang.title()]:
+		f = os.path.join(_info[id]['path'], 'resources', 'language', l, 'strings.xml')
 		if os.path.isfile(f):
 			print "Reading", f
 			xml = parseString(quickesc(f))
@@ -74,8 +90,6 @@ def read_strings(id, lang):
 					frags.append(node.data)
 				_strings[id][tag.getAttribute('id')] = ''.join(frags)
 			return
-		# sometimes it's 'english' instead of 'English'
-		lang = lang.lower()
 
 def read_addon(id=None, dir=None, full=True):
 
@@ -124,7 +138,12 @@ def read_addon(id=None, dir=None, full=True):
 
 		if full and not id in _settings:
 			read_settings(id)
+			_strings[id] = {}
+			# start with english
 			read_strings(id, 'English')
+			# overlay any non-english strings
+			if _settings['xbmc'][u'language'].lower() != 'english':
+				read_strings(id, _settings['xbmc'][u'language'])
 
 		return id
 	return None
@@ -134,9 +153,8 @@ except NameError:
 	__builtin__._settings = {}
 	__builtin__._strings = {}
 	__builtin__._info = {}
+	read_xbmc_settings()
 	__builtin__._mainid = read_addon()
-
-	_settings['xbmc'] = {u'theme':u'0'}
 
 	if _mainid:
 		print ""

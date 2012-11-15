@@ -82,7 +82,7 @@ def getSkinDir():
 
 def getLanguage():
 	"""Returns the active language as a string."""
-	return ""
+	return _settings['xbmc']['language']
 
 def getIPAddress():
 	"""Returns the current ip address as a string."""
