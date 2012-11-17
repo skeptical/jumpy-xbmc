@@ -150,8 +150,22 @@ def read_addon(id=None, dir=None, full=True):
 		return id
 	return None
 
+class xbmcimport:
+	# a finder to amend sys.path on the fly in case an addon
+	# tries to import a non-dep script.module (e.g. classiccinema)
+	def find_module(self, fullname, path=None):
+		id = "script.module.%s" % (fullname)
+		if path is None and not id in _info:
+			id = read_addon(id)
+			if id is not None:
+				lib = os.path.join(_info[id]['path'], _info[id]['_lib'])
+				pms.addPath(lib)
+				sys.path.append(lib)
+		return None
+
 try: _settings
 except NameError:
+	sys.meta_path.append(xbmcimport())
 	__builtin__._settings = {}
 	__builtin__._strings = {}
 	__builtin__._info = {}
