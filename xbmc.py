@@ -1,11 +1,11 @@
-import sys, os, traceback #, imp
-import sqlite3 #, itertools
-from cStringIO import StringIO
-from ConfigParser import ConfigParser
-
-import jumpy
+import sys, os, jumpy
 
 if len(sys.argv) == 1:
+
+	import traceback #, imp
+	import sqlite3 #, itertools
+	from cStringIO import StringIO
+	from ConfigParser import ConfigParser
 
 	xbmc_home = pms.getProperty('xbmc.path')
 	if xbmc_home != "" and xbmc_home is not None:
@@ -58,9 +58,19 @@ if len(sys.argv) == 1:
 			pms.addPath(info['_pythonpath'])
 			script = os.path.join(info['path'], info['_script'])
 			thumb = os.path.join(info['path'], info['icon'])
-			pms.addItem(PMS_FOLDER, "[xbmc]   %s" % info['name'], [script, 'plugin://' + id + '/'], thumb)
+			pms.addItem(PMS_FOLDER, "[xbmc]   %s" % info['name'], [sys.argv[0], script, 'plugin://' + id + '/'], thumb)
 		except KeyError:
 			pass
 		except:
 			traceback.print_exc(file=sys.stdout)
+
+else:
+	# the only purpose here is to ensure os,sys,jumpy,xbmcinit
+	# are loaded at addon startup
+	del sys.argv[0]
+	addondir = os.path.dirname(sys.argv[0])
+	os.chdir(addondir)
+	sys.path[0] = addondir
+	import xbmcinit
+	execfile(sys.argv[0])
 
