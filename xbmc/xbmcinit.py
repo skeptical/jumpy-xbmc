@@ -96,11 +96,15 @@ def read_addon(id=None, dir=None, full=True):
 	if id is not None and id in _info and _info[id] is not None:
 		return id
 
-	addonsdir = os.path.join(_special['home'], 'addons')
-	xbmcaddonsdir = os.path.join(_special['xbmc'], 'addons')
-	xml = os.path.join(dir or ('.' if id is None else os.path.join(addonsdir, id)), 'addon.xml')
+	for dir in [dir] if dir else ['.'] if id is None else [
+				os.path.join(_special['home'], 'addons', id),
+				os.path.join(_special['xbmc'], 'addons', id)
+			]:
+		xml = os.path.join(dir, 'addon.xml')
+		if os.path.isfile(xml): break
+		xml = None
 
-	if os.path.isfile(xml):
+	if xml is not None:
 		addon = ElementTree(fromstring(quickesc(xml)))
 		id = addon.getroot().attrib['id']
 		if not id in _info:
@@ -127,11 +131,8 @@ def read_addon(id=None, dir=None, full=True):
 				# recurse through dep tree to gather PYTHONPATH
 				for mod in addon.findall('.//requires/import'):
 					dep = mod.attrib['addon']
-					if dep != 'xbmc.python' and not dep in paths:
-						addondir = os.path.join(addonsdir, dep)
-						if not os.path.exists(addondir):
-							addondir = os.path.join(xbmcaddonsdir, dep)
-						read_addon(dir=addondir, full=full)
+					if dep != 'xbmc.python' and not dep in paths and \
+							read_addon(id=dep, full=full) != None:
 						paths.extend(_info[dep]['_pythonpath'].split(os.path.pathsep))
 				_info[id]['_pythonpath'] = os.path.pathsep.join(set(paths))
 			except:
