@@ -4,7 +4,7 @@ from xml.etree.ElementTree import ElementTree, fromstring
 from xml.dom.minidom import parseString
 from xml.sax.saxutils import unescape
 
-version = '0.3.1'
+version = '0.3.2'
 
 # see http://wiki.xbmc.org/index.php?title=Special_protocol
 try: _special
