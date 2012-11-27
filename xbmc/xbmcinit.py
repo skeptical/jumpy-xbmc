@@ -1,4 +1,4 @@
-import __builtin__, os, sys, platform, traceback
+import __builtin__, os, sys, platform, traceback, re
 from xml.etree.ElementTree import ElementTree, fromstring
 #from xml.dom.minidom import parse
 from xml.dom.minidom import parseString
@@ -64,6 +64,13 @@ def read_xbmc_settings():
 		pms.setEnv('xbmc_lang', lang)
 	_settings['xbmc'][u'language'] = lang
 
+class masked(str):
+	# a str that hides its repr (e.g. in a dict printout)
+	def __repr__(self):
+		return '\'####\''
+
+sensitive = re.compile('pass|pw|user')
+
 def read_settings(id):
 	_settings[id] = {}
 	for f in [
@@ -74,8 +81,11 @@ def read_settings(id):
 			print "Reading", f
 			xml = parseString(quickesc(f))
 			for tag in xml.getElementsByTagName('setting'):
+				key = tag.getAttribute('id')
 				val = tag.getAttribute('value') if tag.hasAttribute('value') else tag.getAttribute('default')
-				_settings[id][tag.getAttribute('id')] = val
+				if not val == '' and sensitive.match(key):
+					val = masked(val)
+				_settings[id][key] = val
 
 def read_strings(id, lang):
 	# lang folder name is usually title case, sometimes lowercase
