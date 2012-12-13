@@ -188,21 +188,32 @@ def addDirectoryItems(handle, items, totalItems=None):
 
 def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	"""Callback function to tell XBMC that the file plugin has been resolved to a url"""
-	if not succeeded:
-		return
-
 	url = listitem.getProperty('path')
-	if url is None:
+	if not succeeded or url is None:
 		return
+	media = getMediaType(listitem)
+	url = url.split(' | ')[0]
+
+	if url.startswith('rtmp'):
+		args, sargs = rtmpsplit(url, listitem)
+		url = "rtmpdump://rtmp2pms?" + urllib.urlencode(args) + (('&' + '&'.join(sargs)) if len(sargs) else '')
+
+	elif url.startswith('plugin://'):
+		dir = os.path.dirname(xbmc.translatePath(url.split('?')[0]))
+		id = xbmcinit.read_addon(dir, full=False)
+		info = _info[id]
+		pms.addPath(info['_pythonpath'])
+		url = [os.path.join(info['path'], info['_script']), url]
+		media = PMS_UNRESOLVED
 
 	# see xbmc/filesystem/StackDirectory.cpp
-	if url.startswith('stack://'):
+	elif url.startswith('stack://'):
 		ct = 0
 		for url in url[8:].split(' , '):
 			listitem.setProperty('path', url.replace(',,', ','))
 			setResolvedUrl(handle, succeeded, listitem, ct)
 			ct += 1
-		sys.exit(0)
+		return
 
 	name = striptags(listitem.getLabel())
 	if name == "" or name == None: name = striptags(listitem.getProperty('title'))
@@ -210,31 +221,12 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	if name == "" or name == None: name = "Item"
 	name = name + "" if stack < 1 else " %d" % stack
 
-	if url.startswith('rtmp'):
-		args, sargs = rtmpsplit(url, listitem)
-		url = "rtmpdump://rtmp2pms?" + urllib.urlencode(args) + (('&' + '&'.join(sargs)) if len(sargs) else '')
-	else:
-		url = url.split(' | ')[0]
-
-	if url.startswith('plugin://'):
-		dir = os.path.dirname(xbmc.translatePath(url.split('?')[0]))
-		id = xbmcinit.read_addon(dir, full=False)
-		info = _info[id]
-		pms.addPath(info['_pythonpath'])
-		url = [os.path.join(info['path'], info['_script']), url]
-		media = PMS_UNRESOLVED
-	else:
-		media = getMediaType(listitem)
-
 	pms.addItem(media, name, url, fullPath(url, listitem.getProperty('thumbnailImage')))
 	print "*** setResolvedUrl ***"
 	print "raw : %s" % listitem.getProperty('path')
 	print "name: %s" % name
 	print "type: %d" % media
 	print "url :",url
-
-	if stack < 0:
-		sys.exit(0)
 
 def endOfDirectory(handle, succeeded=None, updateListing=None, cacheToDisc=None):
 	"""Callback function to tell XBMC that the end of the directory listing in a virtualPythonFolder is reached."""
