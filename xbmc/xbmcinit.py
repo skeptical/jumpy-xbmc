@@ -21,8 +21,8 @@ except NameError:
 		_special['temp'] = _special['home'] + '/temp'
 	elif sys.platform.startswith('win32'):
 		_special['xbmc'] = main if main else \
-			(os.getenv('ProgramFiles') if platform.release() == 'XP' \
-			else os.getenv('ProgramFiles(x86)')) + '\\XBMC'
+			(os.getenv('PROGRAMFILES(X86)') if 'PROGRAMFILES(X86)' in os.environ \
+			else os.getenv('PROGRAMFILES')) + '\\XBMC'
 		_special['home'] = home if home else os.getenv('APPDATA') + '\\XBMC'
 		_special['temp'] = _special['home'] + '\\temp'
 	elif sys.platform.startswith('darwin'):
