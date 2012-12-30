@@ -238,15 +238,15 @@ class Player:
 
 	def isPlaying(self):
 		"""returns True is xbmc is playing a file."""
-		pass
+		return True
 
 	def isPlayingAudio(self):
 		"""returns True is xbmc is playing an audio file."""
-		pass
+		return True
 
 	def isPlayingVideo(self):
 		"""returns True if xbmc is playing a video."""
-		pass
+		return True
 
 	def getPlayingFile(self):
 		"""returns the current playing file as a string."""
