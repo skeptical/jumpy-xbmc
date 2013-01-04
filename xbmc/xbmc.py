@@ -100,9 +100,13 @@ def getCpuTemp():
 	"""Returns the current cpu temperature as an integer."""
 	return 0
 
+# xbmc/GUIInfoManager.cpp
 def getInfoLabel(infotag):
 	"""Returns an InfoLabel as a string."""
-	return ""
+	if infotag == 'System.BuildVersion':
+		return "12.0"
+	# string/number
+	return "0"
 
 def getInfoImage(infotag):
 	"""Returns a filename including path to the InfoImage's"""
