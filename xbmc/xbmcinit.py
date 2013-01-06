@@ -189,3 +189,26 @@ except NameError:
 		print ""
 		print "Settings:", _settings[_mainid]
 
+
+class mock(object):
+	'''
+	A shapeless self-referring class that never raises
+	an AttributeError, is always callable and will always
+	evaluate as a string, int, float, bool, or container.
+	'''
+	# http://www.rafekettler.com/magicmethods.html
+	def __new__(cls, *args): return object.__new__(cls)
+	def __init__(self, *args): pass
+	def __getattr__(self, name): return self
+	def __call__(self, *args, **kwargs): return self
+	def __int__(self): return 0
+	def __float__(self): return 0
+	def __str__(self): return '0'
+	def __nonzero__(self): return False
+	def __getitem__(self, key): return self
+	def __setitem__(self, key,value): pass
+	def __delitem__(self, key): pass
+	def __len__(self): return 3
+	def __iter__(self): return iter([self,self,self])
+
+

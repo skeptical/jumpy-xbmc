@@ -111,134 +111,196 @@ class Dialog:
 		print "*** dialog select ***\n%s%s" % (heading, list)
 		return 0
 
-class DialogProgress:
 
-	def create(self, heading, line1=None, line2=None, line3=None):
-		"""Create and show a progress dialog."""
-		pass
+# mock everything else, mostly
 
-	def update(self, percent, line1=None, line2=None, line3=None):
-		"""Update's the progress dialog."""
-		pass
+from xbmcinit import mock
 
-	def iscanceled(self):
-		"""Returns True if the user pressed cancel."""
-		return False
+DialogProgress = mock()
 
-	def close(self):
-		"""Close the progress dialog."""
-		pass
+Window = \
+WindowDialog = \
+WindowXMLDialog = mock()
 
-# xbmc/interfaces/python/xbmcmodule/winxmldialog.cpp
-class WindowXMLDialog:
+Window.getResolution = lambda:5 # NTSC 16:9 (720x480)
+Window.getWidth = lambda:720
+Window.getHeight = lambda:480
 
-	def __init__(self, xmlFilename, scriptPath=None, defaultSkin=None, defaultRes=None):
-		"""Create a new WindowXMLDialog script."""
-		pass
+Control = \
+ControlButton = \
+ControlCheckMark = \
+ControlFadeLabel = \
+ControlGroup = \
+ControlImage = \
+ControlLabel = \
+ControlList = \
+ControlProgress = \
+ControlRadioButton = \
+ControlTextBox = mock()
 
-	def doModal(self):
-		pass
+#class DialogProgress:
 
-class Window:
+#	def create(self, heading, line1=None, line2=None, line3=None):
+#		"""Create and show a progress dialog."""
+#		pass
 
-	def __init__(self, windowId):
-		self.properties = {}
-		self.properties['windowId'] = windowId;
+#	def update(self, percent, line1=None, line2=None, line3=None):
+#		"""Update's the progress dialog."""
+#		pass
 
-	def addControl(self, control):
-		"""Add a Control to this window."""
-		pass
+#	def iscanceled(self):
+#		"""Returns True if the user pressed cancel."""
+#		return False
 
-	def addControls(self, controlList):
-		"""Add a list of Controls to this window."""
-		pass
+#	def close(self):
+#		"""Close the progress dialog."""
+#		pass
 
-	def clearProperties(self):
-		"""Clears all window properties."""
-		self.properties = {}
+#class Window:
 
-	def clearProperty(self, key):
-		"""Clears the specific window property."""
-		self.properties[key] = None
+#	def __init__(self, windowId):
+#		self.properties = {}
+#		self.properties['windowId'] = windowId;
 
-	def close(self):
-		"""Closes this window."""
-		pass
+#	def addControl(self, control):
+#		"""Add a Control to this window."""
+#		pass
 
-	def doModal(self):
-		"""Display this window until close() is called."""
-		pass
+#	def addControls(self, controlList):
+#		"""Add a list of Controls to this window."""
+#		pass
 
-	def getControl(self, controlId):
-		"""Get's the control from this window."""
-		pass
+#	def clearProperties(self):
+#		"""Clears all window properties."""
+#		self.properties = {}
 
-	def getFocus(self, control):
-		"""returns the control which is focused."""
-		pass
+#	def clearProperty(self, key):
+#		"""Clears the specific window property."""
+#		self.properties[key] = None
 
-	def getFocusId(self):
-		"""returns the id of the control which is focused."""
-		return 0
+#	def close(self):
+#		"""Closes this window."""
+#		pass
 
-	def getHeight(self):
-		"""Returns the height of this screen."""
-		return 480
+#	def doModal(self):
+#		"""Display this window until close() is called."""
+#		pass
 
-	def getProperty(self, key):
-		"""Returns a window property as a string, similar to an infolabel."""
-		return self.properties[key] if key in self.properties else ''
+#	def getControl(self, controlId):
+#		"""Get's the control from this window."""
+#		pass
 
+#	def getFocus(self, control):
+#		"""returns the control which is focused."""
+#		pass
 
-	def getResolution(self):
-		"""Returns the resolution of the screen. The returned value is one of the following:"""
-		return 5 # NTSC 16:9 (720x480)
+#	def getFocusId(self):
+#		"""returns the id of the control which is focused."""
+#		return 0
 
-	def getWidth(self):
-		"""Returns the width of this screen."""
-		return 720
+#	def getHeight(self):
+#		"""Returns the height of this screen."""
+#		return 480
 
-	def onAction(self, action):
-		"""onAction method."""
-		pass
+#	def getProperty(self, key):
+#		"""Returns a window property as a string, similar to an infolabel."""
+#		return self.properties[key] if key in self.properties else ''
 
-	def onClick(self, control):
-		"""onClick method."""
-		pass
+#	def getResolution(self):
+#		"""Returns the resolution of the screen. The returned value is one of the following:"""
+#		return 5 # NTSC 16:9 (720x480)
 
-	def onFocus(self, control):
-		"""onFocus method."""
-		pass
+#	def getWidth(self):
+#		"""Returns the width of this screen."""
+#		return 720
 
-	def onInit(self):
-		"""onInit method."""
-		pass
+#	def onAction(self, action):
+#		"""onAction method."""
+#		pass
 
-	def removeControl(self, control):
-		"""Removes the control from this window."""
-		pass
+#	def onClick(self, control):
+#		"""onClick method."""
+#		pass
 
-	def removeControls(self, controlList):
-		"""Removes a list of controls from this window."""
-		pass
+#	def onFocus(self, control):
+#		"""onFocus method."""
+#		pass
 
-	def setCoordinateResolution(self, resolution):
-		"""Sets the resolution"""
-		pass
+#	def onInit(self):
+#		"""onInit method."""
+#		pass
 
-	def setFocus(self, control):
-		"""Give the supplied control focus."""
-		pass
+#	def removeControl(self, control):
+#		"""Removes the control from this window."""
+#		pass
 
-	def setFocusId(self):
-		"""Gives the control with the supplied focus."""
-		pass
+#	def removeControls(self, controlList):
+#		"""Removes a list of controls from this window."""
+#		pass
 
-	def setProperty(self, key, value):
-		"""Sets a window property, similar to an infolabel."""
-		self.properties[key] = value;
+#	def setCoordinateResolution(self, resolution):
+#		"""Sets the resolution"""
+#		pass
 
-	def show(self):
-		"""Show this window."""
-		pass
+#	def setFocus(self, control):
+#		"""Give the supplied control focus."""
+#		pass
+
+#	def setFocusId(self):
+#		"""Gives the control with the supplied focus."""
+#		pass
+
+#	def setProperty(self, key, value):
+#		"""Sets a window property, similar to an infolabel."""
+#		self.properties[key] = value;
+
+#	def show(self):
+#		"""Show this window."""
+#		pass
+
+#class WindowDialog(Window):
+
+#	def __init__(self):
+#		Window.__init__(self, 0)
+#		pass
+
+#class WindowXML(Window):
+
+#	def __init__(self, xmlFilename, scriptPath=None, defaultSkin=None, forceFallback=False):
+#		Window.__init__(self, 0)
+
+#	def addItem(item, position=None):
+#		"""addItem(item[, position]) -- Add a new item to this Window List."""
+#		pass
+
+#	def clearList():
+#		"""clearList() -- Clear the Window List."""
+#		pass
+
+#	def getCurrentListPosition():
+#		"""getCurrentListPosition() -- Gets the current position in the Window List."""
+#		return 0
+
+#	def getListItem(position):
+#		"""getListItem(position) -- Returns a given ListItem in this Window List."""
+#		return None
+
+#	def getListSize():
+#		"""getListSize() -- Returns the number of items in this Window List."""
+#		return 0
+
+#	def removeItem(position):
+#		"""removeItem(position) -- Removes a specified item based on position, from the Window List."""
+#		pass
+
+#	def setCurrentListPosition(position):
+#		"""setCurrentListPosition(position) -- Set the current position in the Window List."""
+#		return 0
+
+## xbmc/interfaces/python/xbmcmodule/winxmldialog.cpp
+#class WindowXMLDialog(WindowXML):
+
+#	def __init__(self, xmlFilename, scriptPath=None, defaultSkin=None, defaultRes=None):
+#		"""Create a new WindowXMLDialog script."""
+#		WindowXML.__init__(self, xmlFilename, scriptPath, defaultSkin)
 

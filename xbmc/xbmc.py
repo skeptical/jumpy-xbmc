@@ -1,6 +1,6 @@
 import os.path
 from urlparse import urlparse
-import xbmcplugin, xbmcgui #, xbmcinit
+import xbmcplugin, xbmcgui, xbmcinit
 
 # xbmc/PlayListPlayer.h
 PLAYLIST_NONE = -1
@@ -384,4 +384,15 @@ class PlayList:
 	def getposition(self):
 		"""returns the position of the current song in this playlist."""
 		pass
+
+
+# mock everything else
+
+from xbmcinit import mock
+
+InfoTagMusic = \
+InfoTagVideo = \
+Keyboard = \
+Monitor = \
+RenderCapture = mock()
 
