@@ -44,6 +44,9 @@ except NameError:
 #	_special['cdrips'] = #TODO: user-defined
 #	_special['skin'] = # ?
 
+def unesc(s):
+	return unescape(s, {"&apos;": "'", "&quot;": '"'})
+
 def quickesc(file):
 	# for some reason xbmc xml files allow unescaped ampersands
 	return unescape(open(file).read()).replace('&','&amp;')
@@ -82,7 +85,7 @@ def read_settings(id):
 			xml = parseString(quickesc(f))
 			for tag in xml.getElementsByTagName('setting'):
 				key = tag.getAttribute('id')
-				val = tag.getAttribute('value') if tag.hasAttribute('value') else tag.getAttribute('default')
+				val = unesc(tag.getAttribute('value') if tag.hasAttribute('value') else tag.getAttribute('default'))
 				if not val == '' and sensitive.match(key):
 					val = masked(val)
 				_settings[id][key] = val
@@ -98,7 +101,7 @@ def read_strings(id, lang):
 				frags = []
 				for node in tag.childNodes:
 					frags.append(node.data)
-				_strings[id][tag.getAttribute('id')] = ''.join(frags)
+				_strings[id][tag.getAttribute('id')] = unesc(''.join(frags))
 			return
 
 def read_addon(id=None, dir=None, full=True):
