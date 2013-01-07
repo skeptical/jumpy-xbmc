@@ -37,7 +37,9 @@ class Addon:
 
 	def setSetting(self, id, value):
 		"""Sets a script setting."""
+		print "*** setSetting *** %s=%s" % (id, value)
 		self.settings[id] = value
+		xbmcinit.changed.add(self._id)
 
 	# sometimes called with an arg, e.g veehd
 	def openSettings(self, arg=None):

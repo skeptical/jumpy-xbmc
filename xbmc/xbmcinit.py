@@ -2,7 +2,8 @@ import __builtin__, os, sys, platform, traceback, re
 from xml.etree.ElementTree import ElementTree, fromstring
 #from xml.dom.minidom import parse
 from xml.dom.minidom import parseString
-from xml.sax.saxutils import unescape
+from xml.sax.saxutils import escape, unescape
+import atexit
 
 version = '0.3.2'
 
@@ -89,6 +90,23 @@ def read_settings(id):
 				if not val == '' and sensitive.match(key):
 					val = masked(val)
 				_settings[id][key] = val
+
+def save_settings(id):
+	print 'Saving settings: %s' % id
+	xml = ['<settings>']
+	for k in sorted(_settings[id].keys()):
+		if k: xml.append('    <setting id="%s" value="%s" />' % \
+			(k, escape(_settings[id][k], {"'": "&apos;", '"': "&quot;"})))
+	xml.append('</settings>')
+	open(os.path.join(_special['userdata'], 'addon_data', id, 'settings.xml'), 'w') \
+		.write('\n'.join(xml))
+
+changed = set()
+
+def done():
+	for id in changed: save_settings(id)
+
+atexit.register(done)
 
 def read_strings(id, lang):
 	# lang folder name is usually title case, sometimes lowercase
