@@ -51,7 +51,8 @@ class Addon:
 		properties = ['author', 'changelog', 'description', 'disclaimer',
 			'fanart', 'icon', 'id', 'name', 'path', 'profile', 'stars', 'summary',
 			'type', 'version']
-		assert id in properties, '%s is not a valid property.' % id
-		return self.info[id] if id in self.info else ''
+		key = id.lower()
+		assert key in properties, '%s is not a valid property.' % id
+		return self.info[key] if key in self.info else ''
 
 
