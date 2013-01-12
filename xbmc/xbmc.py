@@ -183,6 +183,7 @@ class Player:
 	def __init__(self, core=None):
 		"""Creates a new Player with as default the xbmc music playlist."""
 		self.playlist = None
+		self.playing = True;
 
 	def play(self, item=None, listitem=None, windowed=None):
 		"""Play this item."""
@@ -242,7 +243,7 @@ class Player:
 
 	def isPlaying(self):
 		"""returns True is xbmc is playing a file."""
-		return True
+		return self.playing
 
 	def isPlayingAudio(self):
 		"""returns True is xbmc is playing an audio file."""
@@ -266,11 +267,17 @@ class Player:
 
 	def getTotalTime(self):
 		"""Returns the total time of the current playing media in"""
-		pass
+		return 0
 
 	def getTime(self):
 		"""Returns the current time of the current playing media as fractional seconds."""
-		pass
+		# pretend to have played for 1 second
+		if self.playing:
+			self.playing = False
+			return 1
+		else:
+			self.playing = True
+			raise Exception("fake playback ended!")
 
 	def seekTime(self):
 		"""Seeks the specified amount of time as fractional seconds."""
