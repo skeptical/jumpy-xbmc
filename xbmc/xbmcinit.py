@@ -5,7 +5,7 @@ from xml.dom.minidom import parseString
 from xml.sax.saxutils import escape, unescape
 import atexit
 
-version = '0.3.2'
+version = '0.3.3'
 
 # see http://wiki.xbmc.org/index.php?title=Special_protocol
 try: _special
