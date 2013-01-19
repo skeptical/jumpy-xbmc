@@ -120,6 +120,7 @@ DialogProgress = mock()
 
 Window = \
 WindowDialog = \
+WindowXML = \
 WindowXMLDialog = mock()
 
 Window.getResolution = lambda:5 # NTSC 16:9 (720x480)

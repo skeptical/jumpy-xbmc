@@ -5,7 +5,7 @@ from xml.dom.minidom import parseString
 from xml.sax.saxutils import escape, unescape
 import atexit
 
-version = '0.3.3'
+version = '0.3.4'
 
 # see http://wiki.xbmc.org/index.php?title=Special_protocol
 try: _special
@@ -140,6 +140,7 @@ def read_addon(id=None, dir=None, full=True):
 		id = addon.getroot().attrib['id']
 		if not id in _info:
 			_info[id] = {}
+			_info[id]['id'] = id
 			_info[id]['name'] = addon.getroot().attrib['name']
 			_info[id]['version'] = addon.getroot().attrib['version']
 			_info[id]['path'] = os.path.abspath(os.path.dirname(xml))

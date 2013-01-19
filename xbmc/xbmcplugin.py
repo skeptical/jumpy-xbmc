@@ -163,7 +163,6 @@ def rtmpsplit(url, listitem):
 
 def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 	"""Callback function to pass directory contents back to XBMC."""
-#	print "rawurl=%s" % url
 	itemtype = PMS_FOLDER
 	script = argv0
 	if not isFolder:
@@ -175,9 +174,11 @@ def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 			listitem.setProperty('path', url)
 			setResolvedUrl(handle, True, listitem, 0)
 			return True
-	pms.addItem(itemtype, striptags(listitem.getLabel()),
-		[script, url] if itemtype < 0 else url,
-		fullPath(url, listitem.getProperty('thumbnailImage')))
+	label = striptags(listitem.getLabel())
+	if label and url:
+		pms.addItem(itemtype, label,
+			[script, url] if itemtype < 0 else url,
+			fullPath(url, listitem.getProperty('thumbnailImage')))
 	return True
 
 def addDirectoryItems(handle, items, totalItems=None):
