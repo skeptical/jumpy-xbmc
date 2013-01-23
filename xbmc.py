@@ -27,6 +27,7 @@ if len(sys.argv) == 1:
 	addonsdir = os.path.join(_special['home'], 'addons')
 
 	disabled = []
+	services = []
 	if os.path.isfile(addonsdb):
 		try:
 			conn = sqlite3.connect(addonsdb)
@@ -34,7 +35,12 @@ if len(sys.argv) == 1:
 			cursor.execute('SELECT addonID FROM disabled')
 			for row in cursor:
 				disabled.append(row[0])
-#			print "disabled: %s" % row[0]
+#				print "disabled: %s" % row[0]
+			cursor.execute('SELECT addonID FROM addon WHERE type = "xbmc.service"')
+			for row in cursor:
+				if not row[0] in disabled:
+					services.append(row[0])
+#					print "service: %s" % row[0]
 			conn.close()
 		except sqlite3.Error, e:
 			print "%s: %s" % (addonsdb, e.args[0])
@@ -49,7 +55,7 @@ if len(sys.argv) == 1:
 		dir = os.path.join(addonsdir, dir)
 		try:
 			id = xbmc.xbmcinit.read_addon(dir=dir, full=False)
-			if id in disabled:
+			if id in disabled or not '_script' in _info[id]:
 				continue
 #			print 'found %s addon.' % name
 			info = _info[id]
@@ -63,6 +69,19 @@ if len(sys.argv) == 1:
 			pass
 		except:
 			traceback.print_exc(file=sys.stdout)
+
+	for id in services:
+		if id in _info:
+			info = _info[id]
+			for ext in info['extension']:
+				if ext['point'] == 'xbmc.service' and 'start' in ext and ext['start'] == 'startup':
+					print "starting service: %s"%id
+					pms.addPath(None)
+					pms.addPath(home)
+					pms.addPath(info['_pythonpath'])
+					pms.run([os.path.join(info['path'], ext['library']), '&'])
+#					pms.run('xterm -e "python %s; bash"' % os.path.join(info['path'], ext['library']))
+					break
 
 else:
 	# the only purpose here is to ensure os,sys,jumpy,xbmcinit

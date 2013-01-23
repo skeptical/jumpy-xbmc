@@ -3,6 +3,7 @@ from xml.etree.ElementTree import ElementTree, fromstring
 #from xml.dom.minidom import parse
 from xml.dom.minidom import parseString
 from xml.sax.saxutils import escape, unescape
+from itertools import groupby
 import atexit
 
 version = '0.3.4'
@@ -122,6 +123,23 @@ def read_strings(id, lang):
 				_strings[id][tag.getAttribute('id')] = unesc(''.join(frags))
 			return
 
+# slightly modified from http://code.activestate.com/recipes/577722-xml-to-python-dictionary-and-back/
+
+def xml2d(e):
+	 """Convert an etree element into a dict structure"""
+	 def _xml2d(e):
+		  kids = dict(e.attrib)
+		  if e.text and e.text.strip():
+				kids['__text__'] = e.text
+		  if e.tail and e.tail.strip():
+				kids['__tail__'] = e.tail
+		  for k, g in groupby(e, lambda x: x.tag):
+				g = [ _xml2d(x) for x in g ]
+				kids[k] = g
+		  return kids
+	 return { e.tag : _xml2d(e) }
+
+
 def read_addon(id=None, dir=None, full=True):
 
 	if id is not None and id in _info and _info[id] is not None:
@@ -139,10 +157,7 @@ def read_addon(id=None, dir=None, full=True):
 		addon = ElementTree(fromstring(quickesc(xml)))
 		id = addon.getroot().attrib['id']
 		if not id in _info:
-			_info[id] = {}
-			_info[id]['id'] = id
-			_info[id]['name'] = addon.getroot().attrib['name']
-			_info[id]['version'] = addon.getroot().attrib['version']
+			_info[id] = xml2d(addon.getroot())['addon']
 			_info[id]['path'] = os.path.abspath(os.path.dirname(xml))
 			_info[id]['profile'] = os.path.join(_special['profile'], 'addon_data', id)
 			_info[id]['icon'] = 'icon.png'
@@ -156,9 +171,9 @@ def read_addon(id=None, dir=None, full=True):
 				except KeyError:
 					# no 'library' means it's the top dir
 					paths = [_info[id]['path']]
-				except AttributeError:
-					_info[id] = None
-					return None
+				except:
+					pass
+
 			try:
 				# recurse through dep tree to gather PYTHONPATH
 				for mod in addon.findall('.//requires/import'):

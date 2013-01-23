@@ -1,5 +1,6 @@
-import os.path
+import os.path, csv, traceback
 from urlparse import urlparse
+from cStringIO import StringIO
 import xbmcplugin, xbmcgui, xbmcinit
 
 # xbmc/PlayListPlayer.h
@@ -37,6 +38,15 @@ CAPTURE_STATE_FAILED = 4 # CAPTURESTATE_FAILED
 CAPTURE_FLAG_CONTINUOUS = 1 # CAPTUREFLAG_CONTINUOUS
 CAPTURE_FLAG_IMMEDIATELY = 2 # CAPTUREFLAG_IMMEDIATELY
 
+SERVER_AIRPLAYSERVER = 2
+SERVER_EVENTSERVER = 6
+SERVER_JSONRPCSERVER = 3
+SERVER_UPNPRENDERER = 4
+SERVER_UPNPSERVER = 5
+SERVER_WEBSERVER = 1
+SERVER_ZEROCONF = 7
+
+abortRequested = False
 
 def log(msg, level=None):
 	"""Write a string to XBMC's log file."""
@@ -54,11 +64,34 @@ def restart():
 
 def executescript(script):
 	"""Execute a python script."""
-	pass
+	runScript(script)
 
 def executebuiltin(function):
 	"""Execute a built in XBMC function."""
-	pass
+	print "**** executebuiltin ****",function
+
+	func,params = function.rsplit(')',2)[0].split('(',2)
+	args = []
+	for row in csv.reader(StringIO(params)):
+		for arg in row:
+			try:
+				# filter numbers and booleans
+				float(arg) or bool(arg)
+				args.append(arg)
+			except:
+				# it must be a string
+				args.append(repr(arg))
+		break
+	code = '%s(%s)' % (func, ','.join(args))
+	print "calling %s\n" % code
+
+	try:
+		exec code
+	except NameError, e:
+#		print e
+		pass
+	except:
+		traceback.print_exc(file=sys.stderr)
 
 def executehttpapi(httpcommand):
 	"""Execute an HTTP API command."""
@@ -402,4 +435,440 @@ InfoTagVideo = \
 Keyboard = \
 Monitor = \
 RenderCapture = mock()
+
+
+
+# xbmc/interfaces/Builtins.cpp
+# http://wiki.xbmc.org/index.php?title=List_of_Built_In_Functions
+
+def PlayMedia(media, isdir=False, preview=1, playoffset=0):
+	"""Play the specified media file (or playlist)"""
+	#TODO: implement this properly
+	Player().play(media)
+
+def RunScript(script, *args):
+	"""Run the specified script"""
+	cmd = [translatePath(script)]
+	cmd.extend(args)
+	cmd.append('&')
+	pms.run(cmd)
+
+#def StopScript(*args):
+#	"""Stop the script by ID or path, if running"""
+#	pass
+
+##if defined(TARGET_DARWIN)
+#def RunAppleScript(*args):
+#	"""Run the specified AppleScript command"""
+#	pass
+##endif
+
+#def RunPlugin(*args):
+#	"""Run the specified plugin"""
+#	pass
+
+#def RunAddon(*args):
+#	"""Run the specified plugin/script"""
+#	pass
+
+#def Extract(*args):
+#	"""Extracts the specified archive"""
+#	pass
+
+
+#def System_Exec(*args):
+#	"""Execute shell commands"""
+#	pass
+
+#def System_ExecWait(*args):
+#	"""Execute shell commands and freezes XBMC until shell is closed"""
+#	pass
+
+#System = mock()
+#System.Exec = System_Exec
+#System.ExecWait = System_ExecWait
+
+#def Help():
+#	"""This help message"""
+#	pass
+
+#def Reboot():
+#	"""Reboot the system"""
+#	pass
+
+#def Restart():
+#	"""Restart the system (same as reboot)"""
+#	pass
+
+#def ShutDown():
+#	"""Shutdown the system"""
+#	pass
+
+#def Powerdown():
+#	"""Powerdown system"""
+#	pass
+
+#def Quit():
+#	"""Quit XBMC"""
+#	pass
+
+#def Hibernate():
+#	"""Hibernates the system"""
+#	pass
+
+#def Suspend():
+#	"""Suspends the system"""
+#	pass
+
+#def InhibitIdleShutdown():
+#	"""Inhibit idle shutdown"""
+#	pass
+
+#def AllowIdleShutdown():
+#	"""Allow idle shutdown"""
+#	pass
+
+#def RestartApp():
+#	"""Restart XBMC"""
+#	pass
+
+#def Minimize():
+#	"""Minimize XBMC"""
+#	pass
+
+#def Reset():
+#	"""Reset the system (same as reboot)"""
+#	pass
+
+#def Mastermode():
+#	"""Control master mode"""
+#	pass
+
+#def ActivateWindow(*args):
+#	"""Activate the specified window"""
+#	pass
+
+#def ActivateWindowAndFocus(*args):
+#	"""Activate the specified window and sets focus to the specified id"""
+#	pass
+
+#def ReplaceWindow(*args):
+#	"""Replaces the current window with the new one"""
+#	pass
+
+#def TakeScreenshot():
+#	"""Takes a Screenshot"""
+#	pass
+
+#def SlideShow(*args):
+#	"""Run a slideshow from the specified directory"""
+#	pass
+
+#def RecursiveSlideShow(*args):
+#	"""Run a slideshow from the specified directory, including all subdirs"""
+#	pass
+
+#def ReloadSkin():
+#	"""Reload XBMC's skin"""
+#	pass
+
+#def UnloadSkin():
+#	"""Unload XBMC's skin"""
+#	pass
+
+#def RefreshRSS():
+#	"""Reload RSS feeds from RSSFeeds.xml"""
+#	pass
+
+#def PlayerControl(*args):
+#	"""Control the music or video player"""
+#	pass
+
+#def Playlist.PlayOffset(*args):
+#	"""Start playing from a particular offset in the playlist"""
+#	pass
+
+#def Playlist.Clear():
+#	"""Clear the current playlist"""
+#	pass
+
+#def EjectTray():
+#	"""Close or open the DVD tray"""
+#	pass
+
+#def AlarmClock(*args):
+#	"""Prompt for a length of time and start an alarm clock"""
+#	pass
+
+#def CancelAlarm(*args):
+#	"""Cancels an alarm"""
+#	pass
+
+#def Action(*args):
+#	"""Executes an action for the active window (same as in keymap)"""
+#	pass
+
+#def Notification(*args):
+#	"""Shows a notification on screen, specify header, then message, and optionally time in milliseconds and a icon."""
+#	pass
+
+#def PlayDVD():
+#	"""Plays the inserted CD or DVD media from the DVD-ROM Drive!"""
+#	pass
+
+#def RipCD():
+#	"""Rip the currently inserted audio CD"""
+#	pass
+
+#def Skin.ToggleSetting(*args):
+#	"""Toggles a skin setting on or off"""
+#	pass
+
+#def Skin.SetString(*args):
+#	"""Prompts and sets skin string"""
+#	pass
+
+#def Skin.SetNumeric(*args):
+#	"""Prompts and sets numeric input"""
+#	pass
+
+#def Skin.SetPath(*args):
+#	"""Prompts and sets a skin path"""
+#	pass
+
+#def Skin.Theme(*args):
+#	"""Control skin theme"""
+#	pass
+
+#def Skin.SetImage(*args):
+#	"""Prompts and sets a skin image"""
+#	pass
+
+#def Skin.SetLargeImage(*args):
+#	"""Prompts and sets a large skin images"""
+#	pass
+
+#def Skin.SetFile(*args):
+#	"""Prompts and sets a file"""
+#	pass
+
+#def Skin.SetAddon(*args):
+#	"""Prompts and set an addon"""
+#	pass
+
+#def Skin.SetBool(*args):
+#	"""Sets a skin setting on"""
+#	pass
+
+#def Skin.Reset(*args):
+#	"""Resets a skin setting to default"""
+#	pass
+
+#def Skin.ResetSettings():
+#	"""Resets all skin settings"""
+#	pass
+
+#def Mute():
+#	"""Mute the player"""
+#	pass
+
+#def SetVolume(*args):
+#	"""Set the current volume"""
+#	pass
+
+#def Dialog.Close(*args):
+#	"""Close a dialog"""
+#	pass
+
+#def System.LogOff():
+#	"""Log off current user"""
+#	pass
+
+#def Resolution(*args):
+#	"""Change XBMC's Resolution"""
+#	pass
+
+#def SetFocus(*args):
+#	"""Change current focus to a different control id"""
+#	pass
+
+#def UpdateLibrary(*args):
+#	"""Update the selected library (music or video)"""
+#	pass
+
+#def CleanLibrary(*args):
+#	"""Clean the video/music library"""
+#	pass
+
+#def ExportLibrary(*args):
+#	"""Export the video/music library"""
+#	pass
+
+#def PageDown(*args):
+#	"""Send a page down event to the pagecontrol with given id"""
+#	pass
+
+#def PageUp(*args):
+#	"""Send a page up event to the pagecontrol with given id"""
+#	pass
+
+#def LastFM.Love():
+#	"""Add the current playing last.fm radio track to the last.fm loved tracks"""
+#	pass
+
+#def LastFM.Ban():
+#	"""Ban the current playing last.fm radio track"""
+#	pass
+
+#def Container.Refresh():
+#	"""Refresh current listing"""
+#	pass
+
+#def Container.Update():
+#	"""Update current listing. Send Container.Update(path,replace) to reset the path history"""
+#	pass
+
+#def Container.NextViewMode():
+#	"""Move to the next view type (and refresh the listing)"""
+#	pass
+
+#def Container.PreviousViewMode():
+#	"""Move to the previous view type (and refresh the listing)"""
+#	pass
+
+#def Container.SetViewMode(*args):
+#	"""Move to the view with the given id"""
+#	pass
+
+#def Container.NextSortMethod():
+#	"""Change to the next sort method"""
+#	pass
+
+#def Container.PreviousSortMethod():
+#	"""Change to the previous sort method"""
+#	pass
+
+#def Container.SetSortMethod(*args):
+#	"""Change to the specified sort method"""
+#	pass
+
+#def Container.SortDirection():
+#	"""Toggle the sort direction"""
+#	pass
+
+#def Control.Move(*args):
+#	"""Tells the specified control to 'move' to another entry specified by offset"""
+#	pass
+
+#def Control.SetFocus(*args):
+#	"""Change current focus to a different control id"""
+#	pass
+
+#def Control.Message(*args):
+#	"""Send a given message to a control within a given window"""
+#	pass
+
+#def SendClick(*args):
+#	"""Send a click message from the given control to the given window"""
+#	pass
+
+#def LoadProfile(*args):
+#	"""Load the specified profile (note; if locks are active it won't work)"""
+#	pass
+
+#def SetProperty(*args):
+#	"""Sets a window property for the current focused window/dialog (key,value)"""
+#	pass
+
+#def ClearProperty(*args):
+#	"""Clears a window property for the current focused window/dialog (key,value)"""
+#	pass
+
+#def PlayWith(*args):
+#	"""Play the selected item with the specified core"""
+#	pass
+
+#def WakeOnLan(*args):
+#	"""Sends the wake-up packet to the broadcast address for the specified MAC address"""
+#	pass
+
+#def Addon.Default.OpenSettings(*args):
+#	"""Open a settings dialog for the default addon of the given type"""
+#	pass
+
+#def Addon.Default.Set(*args):
+#	"""Open a select dialog to allow choosing the default addon of the given type"""
+#	pass
+
+#def Addon.OpenSettings(*args):
+#	"""Open a settings dialog for the addon of the given id"""
+#	pass
+
+#def UpdateAddonRepos():
+#	"""Check add-on repositories for updates"""
+#	pass
+
+#def UpdateLocalAddons():
+#	"""Check for local add-on changes"""
+#	pass
+
+#def ToggleDPMS():
+#	"""Toggle DPMS mode manually"""
+#	pass
+
+#def Weather.Refresh():
+#	"""Force weather data refresh"""
+#	pass
+
+#def Weather.LocationNext():
+#	"""Switch to next weather location"""
+#	pass
+
+#def Weather.LocationPrevious():
+#	"""Switch to previous weather location"""
+#	pass
+
+#def Weather.LocationSet(*args):
+#	"""Switch to given weather location (parameter can be 1-3)"""
+#	pass
+
+##if defined(HAS_LIRC) || defined(HAS_IRSERVERSUITE)
+#def LIRC.Stop():
+#	"""Removes XBMC as LIRC client"""
+#	pass
+
+#def LIRC.Start():
+#	"""Adds XBMC as LIRC client"""
+#	pass
+
+#def LIRC.Send(*args):
+#	"""Sends a command to LIRC"""
+#	pass
+##endif
+
+##ifdef HAS_LCD
+#def LCD.Suspend():
+#	"""Suspends LCDproc"""
+#	pass
+
+#def LCD.Resume():
+#	"""Resumes LCDproc"""
+#	pass
+##endif
+
+#def VideoLibrary.Search():
+#	"""Brings up a search dialog which will search the library"""
+#	pass
+
+#def ToggleDebug():
+#	"""Enables/disables debug mode"""
+#	pass
+
+#def StartPVRManager():
+#	"""(Re)Starts the PVR manager"""
+#	pass
+
+#def StopPVRManager():
+#	"""Stops the PVR manager"""
+#	pass
 

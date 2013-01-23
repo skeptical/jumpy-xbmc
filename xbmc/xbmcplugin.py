@@ -65,11 +65,12 @@ argv0 = sys.argv[0]
 
 # restructure args to xbmc command format, i.e.
 #   'plugin://plugin.video.foo/ [window_id query_string]'
-argv = sys.argv[1].split('?')
-sys.argv = []
-sys.argv.append(argv[0])
-sys.argv.append('0')
-sys.argv.append("" if len(argv) == 1 else "?" + argv[1])
+if len(sys.argv) > 1:
+	argv = sys.argv[1].split('?')
+	sys.argv = []
+	sys.argv.append(argv[0])
+	sys.argv.append('0')
+	sys.argv.append("" if len(argv) == 1 else "?" + argv[1])
 
 # added functions
 
