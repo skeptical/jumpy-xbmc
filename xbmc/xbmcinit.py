@@ -87,7 +87,7 @@ def read_settings(id):
 			for tag in xml.getElementsByTagName('setting'):
 				key = tag.getAttribute('id')
 				val = unesc(tag.getAttribute('value') if tag.hasAttribute('value') else tag.getAttribute('default'))
-				if not val == '' and sensitive.match(key):
+				if not val == '' and sensitive.search(key.lower()):
 					val = masked(val)
 				_settings[id][key] = val
 
