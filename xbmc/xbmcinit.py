@@ -25,7 +25,7 @@ except NameError:
 			(os.getenv('PROGRAMFILES(X86)') if 'PROGRAMFILES(X86)' in os.environ \
 			else os.getenv('PROGRAMFILES')) + '\\XBMC'
 		_special['home'] = home if home else os.getenv('APPDATA') + '\\XBMC'
-		_special['temp'] = _special['home'] + '\\temp'
+		_special['temp'] = _special['home'] + '\\cache'
 	elif sys.platform.startswith('darwin'):
 		_special['xbmc'] = main if main else \
 			'/Applications/XBMC.app/Contents/Resources/XBMC'
