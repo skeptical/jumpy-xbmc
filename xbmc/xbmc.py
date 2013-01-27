@@ -318,7 +318,7 @@ class Player:
 
 	def setSubtitles(self, path):
 		"""set subtitle file and enable subtitles"""
-		pass
+		pms.setSubtitles(path)
 
 	def getSubtitles(self):
 		"""get subtitle stream name."""
