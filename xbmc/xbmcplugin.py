@@ -72,7 +72,17 @@ if len(sys.argv) > 1:
 	sys.argv.append('0')
 	sys.argv.append("" if len(argv) == 1 else "?" + argv[1])
 
+librtmp_checked = False
+librtmp = False
+
 # added functions
+
+def using_librtmp():
+	global librtmp_checked, librtmp
+	if not librtmp_checked:
+		librtmp = pms.getVar('using_librtmp') == 'true'
+		librtmp_checked = True
+	return librtmp
 
 def getMediaType(listitem):
 	itemtype = listitem.getProperty('type').strip().upper()
@@ -96,7 +106,7 @@ def fullPath(base, path):
 # see xbmc/guilib/GUITextLayout.cpp::ParseText
 def striptags(label):
 	if label is not None:
-		return label.replace('[COLOR ', '[').replace('[/COLOR]', '') \
+		return label.replace('[COLOR ', '[').replace('[COLOR=', '[').replace('[/COLOR]', '') \
 			.replace('[B]', '').replace('[/B]', '') \
 			.replace('[I]', '').replace('[/I]', '')
 	return label
@@ -160,6 +170,26 @@ def rtmpsplit(url, listitem):
 	print "test cmd: %s\n" %  cmd
 	return (args, sargs)
 
+def librtmpify(url, listitem):
+	newurl = [url]
+	# see xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamRTMP.cpp:120
+	for key,tag in [
+			( "SWFPlayer", "swfUrl"),
+			( "PageURL",   "pageUrl"),
+			( "PlayPath",  "playpath"),
+			( "TcUrl",     "tcUrl"),
+			( "IsLive",    "live")
+		]:
+			try:
+				val = listitem.getProperty(key)
+				if val:
+					newurl.append('%s=%s' % (tag, val))
+			except KeyError:
+				pass
+	newurl = ' '.join(newurl)
+	print 'test cmd: ffmpeg -y -i "%s" -target ntsc-dvd - \n' %  newurl
+	return newurl
+
 # native xbmc functions
 
 def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
@@ -197,8 +227,11 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	url = url.split(' | ')[0]
 
 	if url.startswith('rtmp'):
-		args, sargs = rtmpsplit(url, listitem)
-		url = "rtmpdump://rtmp2pms?" + urllib.urlencode(args) + (('&' + '&'.join(sargs)) if len(sargs) else '')
+		if using_librtmp():
+			url = librtmpify(url, listitem)
+		else:
+			args, sargs = rtmpsplit(url, listitem)
+			url = "rtmpdump://rtmp2pms?" + urllib.urlencode(args) + (('&' + '&'.join(sargs)) if len(sargs) else '')
 
 	elif url.startswith('plugin://'):
 		dir = os.path.dirname(xbmc.translatePath(url.split('?')[0]))
