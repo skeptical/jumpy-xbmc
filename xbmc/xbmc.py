@@ -172,7 +172,7 @@ def makeLegalFilename(filename, fatX=None):
 def translatePath(url, asURL=False):
 	"""Returns the translated path."""
 	try:
-		scheme, loc, path, x, x, x = urlparse(url)
+		scheme, loc, path, x, x, x = urlparse(url.replace('\\', '/'))
 #		print "scheme=%s loc=%s path=%s\nspecial[loc]=%s" % (scheme, loc, path,_special[loc])
 		if scheme == 'special' and loc in _special:
 			return ('file://' if asURL else '') \

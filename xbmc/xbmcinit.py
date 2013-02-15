@@ -1,4 +1,4 @@
-import __builtin__, os, sys, platform, traceback, re
+import __builtin__, os, sys, platform, traceback, re, jumpy
 from xml.etree.ElementTree import ElementTree, fromstring
 #from xml.dom.minidom import parse
 from xml.dom.minidom import parseString
@@ -6,7 +6,7 @@ from xml.sax.saxutils import escape, unescape
 from itertools import groupby
 import atexit
 
-version = '0.3.4'
+version = '0.3.5-dev'
 
 # see http://wiki.xbmc.org/index.php?title=Special_protocol
 try: _special
@@ -96,7 +96,7 @@ def save_settings(id):
 	print 'Saving settings: %s' % id
 	xml = ['<settings>']
 	for k in sorted(_settings[id].keys()):
-		if k: xml.append('    <setting id="%s" value="%s" />' % \
+		if k: xml.append('	<setting id="%s" value="%s" />' % \
 			(k, escape(_settings[id][k], {"'": "&apos;", '"': "&quot;"})))
 	xml.append('</settings>')
 	open(os.path.join(_special['userdata'], 'addon_data', id, 'settings.xml'), 'w') \
@@ -105,7 +105,9 @@ def save_settings(id):
 changed = set()
 
 def done():
-	for id in changed: save_settings(id)
+	global changed
+	for id in changed:
+		save_settings(id)
 
 atexit.register(done)
 
@@ -191,7 +193,7 @@ def read_addon(id=None, dir=None, full=True):
 			# start with english
 			read_strings(id, 'English')
 			# overlay any non-english strings
-			if _settings['xbmc'][u'language'].lower() != 'english':
+			if not 'english' in _settings['xbmc'][u'language'].lower():
 				read_strings(id, _settings['xbmc'][u'language'])
 
 		return id

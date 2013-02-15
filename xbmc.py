@@ -75,7 +75,7 @@ if len(sys.argv) == 1:
 			info = _info[id]
 			for ext in info['extension']:
 				if ext['point'] == 'xbmc.service' and 'start' in ext and ext['start'] == 'startup':
-					print "starting service: %s"%id
+					print "\nstarting service: %s"%id
 					pms.addPath(None)
 					pms.addPath(home)
 					pms.addPath(info['_pythonpath'])

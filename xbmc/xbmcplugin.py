@@ -224,7 +224,8 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	if not succeeded or url is None:
 		return
 	media = getMediaType(listitem)
-	url = url.split(' | ')[0]
+	if '|' in url:
+		url,headers = url.split('|')
 
 	if url.startswith('rtmp'):
 		if using_librtmp():
@@ -267,7 +268,7 @@ def endOfDirectory(handle, succeeded=None, updateListing=None, cacheToDisc=None)
 	"""Callback function to tell XBMC that the end of the directory listing in a virtualPythonFolder is reached."""
 	print "*** endOfDirectory ***"
 
-def addSortMethod(handle, sortMethod, label2=None):
+def addSortMethod(handle, sortMethod, label2Mask=None):
 	"""Adds a sorting method for the media list."""
 	pass
 
