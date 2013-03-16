@@ -61,21 +61,26 @@ SORT_NORMALLY = 0
 SORT_ON_TOP = 1
 SORT_ON_BOTTOM = 2
 
-argv0 = sys.argv[0]
-
-# restructure args to xbmc command format, i.e.
-#   'plugin://plugin.video.foo/ [window_id query_string]'
-if len(sys.argv) > 1:
-	argv = sys.argv[1].split('?')
-	sys.argv = []
-	sys.argv.append(argv[0])
-	sys.argv.append('0')
-	sys.argv.append("" if len(argv) == 1 else "?" + argv[1])
-
 librtmp_checked = False
 librtmp = False
 
+argv0 = sys.argv[0]
+
 # added functions
+
+def setargv(argv):
+	global argv0
+	argv0 = sys.argv[0]
+	# restructure args to xbmc command format, i.e.
+	#   'plugin://plugin.video.foo/ [window_id query_string]'
+	if len(argv) > 1:
+		args = argv[1].split('?')
+		sys.argv = []
+		sys.argv.append(args[0])
+		sys.argv.append('0')
+		sys.argv.append("" if len(args) == 1 else "?" + args[1])
+
+setargv(sys.argv)
 
 def using_librtmp():
 	global librtmp_checked, librtmp
@@ -198,6 +203,8 @@ def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 	script = argv0
 	if not isFolder:
 		if url.startswith('plugin://'):
+#			xbmcinit.run_addon(url)
+#			return True
 			id = urlparse(url).netloc
 			script = os.path.join(_info[id]['path'], _info[id]['_script'])
 			itemtype = PMS_UNRESOLVED
@@ -235,12 +242,14 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 			url = "rtmpdump://rtmp2pms?" + urllib.urlencode(args) + (('&' + '&'.join(sargs)) if len(sargs) else '')
 
 	elif url.startswith('plugin://'):
-		dir = os.path.dirname(xbmc.translatePath(url.split('?')[0]))
-		id = xbmcinit.read_addon(dir, full=False)
-		info = _info[id]
-		pms.addPath(info['_pythonpath'])
-		url = [os.path.join(info['path'], info['_script']), url]
-		media = PMS_UNRESOLVED
+		xbmcinit.run_addon(url)
+		return
+#		dir = os.path.dirname(xbmc.translatePath(url.split('?')[0]))
+#		id = xbmcinit.read_addon(dir, full=False)
+#		info = _info[id]
+#		pms.addPath(info['_pythonpath'])
+#		url = [os.path.join(info['path'], info['_script']), url]
+#		media = PMS_UNRESOLVED
 
 	# see xbmc/filesystem/StackDirectory.cpp
 	elif url.startswith('stack://'):

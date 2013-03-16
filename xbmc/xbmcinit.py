@@ -1,10 +1,11 @@
-import __builtin__, os, sys, platform, traceback, re, jumpy
+import __builtin__, os, sys, platform, atexit, traceback, re, jumpy
+import imp, types, marshal
 from xml.etree.ElementTree import ElementTree, fromstring
 #from xml.dom.minidom import parse
 from xml.dom.minidom import parseString
 from xml.sax.saxutils import escape, unescape
 from itertools import groupby
-import atexit
+from urlparse import urlparse
 
 version = '0.3.5-dev'
 
@@ -211,6 +212,90 @@ def read_addon(id=None, dir=None, full=True):
 		return id
 	return None
 
+# see http://nedbatchelder.com/blog/200905/running_a_python_file_as_main_take_2.html
+# http://stackoverflow.com/questions/1830727/how-to-load-compiled-python-modules-from-memory
+
+def load_addon(id):
+	print 'loading %s' % id
+	script = os.path.join(_info[id]['path'], _info[id]['_script'])
+	pyc = '%sc' % script
+	if os.path.exists(pyc):
+		src = open(pyc, 'rb')
+		codeobj = marshal.loads(src.read()[8:])
+	else:
+		src = open(script)
+		code = src.read()
+		if not code or code[-1] != '\n':
+			code += '\n'
+		codeobj = compile(code, script, 'exec')
+	src.close()
+	mod = types.ModuleType('__main__')
+#	mod = imp.new_module('__main__') # also works
+	mod.__file__ = script
+	mod.__path__ = [os.path.dirname(script)]
+	mod.__builtins__ = sys.modules['__builtin__']
+	_addons[id] = (mod, codeobj)
+
+# see also http://pyunit.sourceforge.net/notes/reloading.html
+#          http://www.indelible.org/ink/python-reloading/
+
+from UserDict import IterableUserDict
+
+class revertableDict(IterableUserDict):
+	"""A dict wrapper to allow reverting to the initial state"""
+	def __init__(self, otherdict):
+		self.data = otherdict
+		self.basekeys = list(self.data.keys())
+	def revert(self):
+		for key in self.data.keys():
+			if not key in self.basekeys:
+				del self.data[key]
+	def clear(self):
+		self.revert()
+
+def run_addon(pluginurl):
+	# execute a 'plugin://' url
+	print '\nrun_addon: %s' % pluginurl
+	import xbmc, xbmcplugin
+	# save state
+	home = os.getcwd()
+	mainid = _mainid
+	main = sys.modules['__main__']
+	path0 = sys.path[0]
+	argv = sys.argv
+	xargv0 = xbmcplugin.argv0
+	sysmods = sys.modules
+	basemods = revertableDict(sys.modules)
+	try:
+		# reset and run
+		id = urlparse(pluginurl).netloc
+		reset(id)
+		addondir = _info[id]['path']
+		os.chdir(addondir)
+		sys.path[0] = addondir
+		if not id in _addons:
+			paths = _info[id]['_pythonpath'].split(os.path.pathsep)
+			sys.path += [p for p in paths if p not in sys.path]
+			load_addon(id)
+		mod, codeobj = _addons[id]
+		xbmcplugin.setargv([mod.__file__, pluginurl])
+		sys.modules['__main__'] = mod
+		sys.modules = basemods
+		exec codeobj in mod.__dict__
+	except:
+		print 'Error: run_addon'
+		traceback.print_exc(file=sys.stdout)
+	finally:
+		# restore state
+		basemods.revert()
+		sys.modules = sysmods
+		os.chdir(home)
+		__builtin__._mainid = mainid
+		sys.modules['__main__'] = main
+		sys.path[0] = path0
+		sys.argv = argv
+		xbmcplugin.argv0 = xargv0
+
 class xbmcimport:
 	# a finder to amend sys.path on the fly in case an addon
 	# tries to import a non-dep script.module (e.g. classiccinema)
@@ -224,19 +309,24 @@ class xbmcimport:
 				sys.path.append(lib)
 		return None
 
+def reset(id=None):
+	__builtin__._mainid = read_addon(id)
+	if _mainid:
+		print ""
+		print "Settings:", _settings[_mainid]
+
 try: _settings
 except NameError:
 	sys.meta_path.append(xbmcimport())
 	__builtin__._settings = {}
 	__builtin__._strings = {}
 	__builtin__._info = {}
+	__builtin__._addons = {}
 	read_xbmc_settings()
-	__builtin__._mainid = read_addon()
 
-	if _mainid:
-		print ""
-		print "Settings:", _settings[_mainid]
-
+try: _mainid
+except NameError:
+	reset()
 
 class mock(object):
 	'''
