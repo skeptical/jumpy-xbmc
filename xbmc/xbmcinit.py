@@ -125,6 +125,18 @@ def read_strings(id, lang):
 				_strings[id][tag.getAttribute('id')] = unesc(''.join(frags))
 			return
 
+def read_dialogs():
+	__builtin__._dialogs = {}
+	dlgfile = os.path.join(pms.getProfileDir(), 'xbmc.dialogs')
+	if os.path.exists(dlgfile):
+		f = open(dlgfile)
+		for line in f:
+			line = line.strip()
+			if not line: continue
+			sel,dlg = line.split('<<<', 1)
+			_dialogs[dlg.strip()] = eval(sel.strip())
+
+
 # slightly modified from http://code.activestate.com/recipes/577722-xml-to-python-dictionary-and-back/
 
 def xml2d(e):

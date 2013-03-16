@@ -1,3 +1,5 @@
+import xbmcinit
+
 def getCurrentWindowId():
 	"""Returns the id for the current 'active' window as an integer."""
 	return 0
@@ -98,18 +100,25 @@ class Dialog:
 
 	def numeric(self, type, heading, default=0):
 		"""Show a 'Numeric' dialog."""
-		print "*** dialog numeric ***\n%s" % [type, heading, default]
-		return default
+		return self.choose('numeric', heading, [], default)
 
-	def yesno(self, heading, line1, line2=None, line3=None, nolabel=None, yeslabel=None):
+	def yesno(self, heading, line1, line2=None, line3=None, nolabel='no', yeslabel='yes'):
 		"""Show a dialog 'YES/NO'."""
-		print "*** dialog YES/NO ***\n%s" % [heading, line1, line2, line3]
-		return False
+		query = '%s%s%s%s' % (heading or '', line1 or '', line2 or '', line3 or '')
+		sel = self.choose('YES/NO', query, [yeslabel, nolabel])
+		return (True if sel == 0 else False)
 
 	def select(self, heading, list, autoclose=None):
 		"""Show a select dialog."""
-		print "*** dialog select ***\n%s%s" % (heading, list)
-		return 0
+		return self.choose('select', heading, list)
+
+	def choose(self, type, query, list, default=0):
+		try: _dialogs
+		except: xbmcinit.read_dialogs()
+		dlg = '%s %s %s' % (repr(query), list, _mainid)
+		sel = (_dialogs[dlg] if dlg in _dialogs else default)
+		print "*** dialog %s ***\n%s <<< %s" % (type, sel, dlg)
+		return sel
 
 
 # mock everything else, mostly
