@@ -91,12 +91,13 @@ def using_librtmp():
 
 def getMediaType(listitem):
 	itemtype = listitem.getProperty('type').strip().upper()
+#	print 'mediatype=%s' % itemtype
 	if itemtype == "VIDEO":
 		return PMS_VIDEO
 	elif itemtype == "AUDIO":
 		return PMS_AUDIO
 	else:
-		return PMS_UNRESOLVED
+		return PMS_UNKNOWN
 
 def fullPath(base, path):
 #	print 'fullPath %s' % [base, path]
@@ -203,19 +204,16 @@ def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 	script = argv0
 	if not isFolder:
 		if url.startswith('plugin://'):
-#			xbmcinit.run_addon(url)
-#			return True
 			id = urlparse(url).netloc
 			script = os.path.join(_info[id]['path'], _info[id]['_script'])
-			itemtype = PMS_UNRESOLVED
+			itemtype = PMS_UNRESOLVED | getMediaType(listitem)
 		else:
 			listitem.setProperty('path', url)
 			setResolvedUrl(handle, True, listitem, 0)
 			return True
 	label = striptags(listitem.getLabel())
 	if label and url:
-		pms.addItem(itemtype, label,
-			[script, url] if itemtype < 0 else url,
+		pms.addItem(itemtype, label, [script, url],
 			fullPath(url, listitem.getProperty('thumbnailImage')))
 	return True
 
