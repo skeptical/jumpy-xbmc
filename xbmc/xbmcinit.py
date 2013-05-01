@@ -7,7 +7,7 @@ from xml.sax.saxutils import escape, unescape
 from itertools import groupby
 from urlparse import urlparse
 
-version = '0.3.5-dev'
+version = '0.3.5'
 
 # see http://wiki.xbmc.org/index.php?title=Special_protocol
 try: _special
