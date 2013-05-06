@@ -54,6 +54,15 @@ def quickesc(file):
 	# for some reason xbmc xml files allow unescaped ampersands
 	return unescape(open(file).read()).replace('&','&amp;')
 
+def parsexml(xml):
+	if not xml or xml.isspace():
+		xml = '<null/>'
+	try:
+		return parseString(xml)
+	except:
+		# it's likely latin1 without a header
+		return parseString(jumpy.decode(xml).encode('utf-8'))
+
 def read_xbmc_settings():
 	_settings['xbmc'] = {}
 	_settings['xbmc'][u'theme'] = 0
@@ -85,7 +94,7 @@ def read_settings(id):
 			]:
 		if os.path.isfile(f):
 			print "Reading", f
-			xml = parseString(quickesc(f))
+			xml = parsexml(quickesc(f))
 			for tag in xml.getElementsByTagName('setting'):
 				key = tag.getAttribute('id')
 				val = unesc(tag.getAttribute('value') if tag.hasAttribute('value') else tag.getAttribute('default'))
@@ -118,7 +127,7 @@ def read_strings(id, lang):
 		f = os.path.join(_info[id]['path'], 'resources', 'language', l, 'strings.xml')
 		if os.path.isfile(f):
 			print "Reading", f
-			xml = parseString(quickesc(f))
+			xml = parsexml(quickesc(f))
 			for tag in xml.getElementsByTagName('string'):
 				frags = []
 				for node in tag.childNodes:
