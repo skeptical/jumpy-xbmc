@@ -9,7 +9,6 @@ from urlparse import urlparse
 
 version = '0.3.5'
 
-# see http://wiki.xbmc.org/index.php?title=Special_protocol
 try: _special
 except NameError:
 	__builtin__._special = {}
@@ -20,19 +19,28 @@ except NameError:
 		_special['xbmc'] = main if main else \
 			('/usr/local/share/xbmc' if os.path.exists('/usr/local/share/xbmc') \
 			else '/usr/share/xbmc')
+		_special['xbmcbin'] = _special['xbmc'].replace('share', 'lib')
 		_special['home'] = home if home else os.getenv('HOME') + '/.xbmc'
+		_special['userhome'] = _special['home']
 		_special['temp'] = _special['home'] + '/temp'
+		_special['logpath'] = _special['temp']
 	elif sys.platform.startswith('win32'):
 		_special['xbmc'] = main if main else \
 			(os.getenv('PROGRAMFILES(X86)') if 'PROGRAMFILES(X86)' in os.environ \
 			else os.getenv('PROGRAMFILES')) + '\\XBMC'
+		_special['xbmcbin'] = _special['xbmc']
 		_special['home'] = home if home else os.getenv('APPDATA') + '\\XBMC'
+		_special['userhome'] = os.getenv('USERPROFILE')
 		_special['temp'] = _special['home'] + '\\cache'
+		_special['logpath'] = _special['home']
 	elif sys.platform.startswith('darwin'):
 		_special['xbmc'] = main if main else \
 			'/Applications/XBMC.app/Contents/Resources/XBMC'
+		_special['xbmcbin'] = _special['xbmc']
 		_special['home'] = home if home else os.getenv('HOME') + '/Library/Application Support/XBMC'
+		_special['userhome'] = _special['home']
 		_special['temp'] = os.getenv('HOME') + '.xbmc/temp'
+		_special['logpath'] = os.getenv('HOME') + '/Library/Logs'
 	mprofile = os.path.join(_special['home'], 'userdata')
 	_special['masterprofile'] = mprofile
 	_special['profile'] = mprofile # FIXME: actually special://masterprofile/profile_name
