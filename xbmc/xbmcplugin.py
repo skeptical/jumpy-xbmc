@@ -110,11 +110,13 @@ def fullPath(base, path):
 	return xbmc.translatePath(path, False)
 
 # see xbmc/guilib/GUITextLayout.cpp::ParseText
+
+ltags = re.compile(r'\[/?(COLOR.*?|B|I)\]')
+
 def striptags(label):
+	global ltags
 	if label is not None:
-		return label.replace('[COLOR ', '[').replace('[COLOR=', '[').replace('[/COLOR]', '') \
-			.replace('[B]', '').replace('[/B]', '') \
-			.replace('[I]', '').replace('[/I]', '')
+		return ltags.sub('', label)
 	return label
 
 def rtmpsplit(url, listitem):

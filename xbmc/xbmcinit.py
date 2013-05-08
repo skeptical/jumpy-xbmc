@@ -71,13 +71,17 @@ def parsexml(xml):
 		# it's likely latin1 without a header
 		return parseString(jumpy.decode(xml).encode('utf-8'))
 
+have_xbmc = False
+
 def read_xbmc_settings():
+	global have_xbmc
 	_settings['xbmc'] = {}
 	_settings['xbmc'][u'theme'] = 0
 	lang = os.getenv('xbmc_lang')
 	if lang is None:
 		guisettings = os.path.join(_special['userdata'], 'guisettings.xml')
 		if os.path.isfile(guisettings):
+			have_xbmc = True
 			print "Reading", guisettings
 			try:
 				xml = ElementTree(fromstring(quickesc(guisettings)))
