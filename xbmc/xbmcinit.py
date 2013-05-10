@@ -6,6 +6,9 @@ from xml.dom.minidom import parseString
 from xml.sax.saxutils import escape, unescape
 from itertools import groupby
 from urlparse import urlparse
+from UserDict import IterableUserDict, DictMixin
+try: import simplejson as json
+except: import json
 
 version = '0.3.5'
 
@@ -175,62 +178,155 @@ def xml2d(e):
 		  return kids
 	 return { e.tag : _xml2d(e) }
 
-
-def read_addon(id=None, dir=None, full=True):
-
-	if id is not None and id in _info and _info[id] is not None:
-		return id
-
-	for dir in [dir] if dir else ['.'] if id is None else [
+def get_addon_path(id):
+	path = _info[id]['path'] if id in _info else None
+	if not path:
+		for p in [
 				os.path.join(_special['home'], 'addons', id),
 				os.path.join(_special['xbmc'], 'addons', id)
 			]:
-		xml = os.path.join(dir, 'addon.xml')
-		if os.path.isfile(xml): break
-		xml = None
+			if os.path.isdir(p): return p
+	return path
 
-	if xml is not None:
+EXPANDED = 1
+COMPLETE = 2
+REQUIRED = 4
+
+class addonDict(DictMixin):
+
+	def __init__(self, jdata=None):
+		self.data = {}
+		self.flags = {}
+		self.vars = {
+			'A':os.path.join(_special['home'], 'addons'),
+			'X':os.path.join(_special['xbmc'], 'addons'),
+			'I':None}
+		if jdata and jdata.strip():
+			self.baseflag = 0
+			self.update(json.loads(jdata))
+		self.baseflag = EXPANDED
+
+	def __getitem__(self, key):
+		if key in self.data:
+			if not self.flags[key] & EXPANDED:
+				self.expand(key)
+			return self.data[key]
+		raise KeyError(key)
+
+	def __setitem__(self, key, item):
+		self.data[key] = item
+		self.flags[key] = self.baseflag
+
+	def __delitem__(self, key):
+		if key in self.data:
+			del self.data[key]
+			del self.flags[key]
+		else:
+			raise KeyError(key)
+
+	def keys(self):
+		return self.data.keys()
+
+	def expand(self, key):
+#		print 'expanding %s'%key
+		self.flags[key] |= EXPANDED
+		self.vars['I'] = key
+		if '{p}' in self.data[key]:
+			self.data[key]['path'] = self.data[key]['{p}'].format(**self.vars)
+			del self.data[key]['{p}']
+		if '{q}' in self.data[key]:
+			self.data[key]['_pythonpath'] = []
+			for s in self.data[key]['{q}']:
+				self.data[key]['_pythonpath'].append(s.format(**self.vars))
+			del self.data[key]['{q}']
+
+	def compr(self, string):
+		s = string
+		for k,v in self.vars.items():
+			s = s.replace(v,'{%s}' % k)
+		return s
+
+	def digest(self, compress=True):
+		compressed = {}
+		paths = []
+		for key in self.data.keys():
+#			print 'compressing %s'%key
+			if compress:
+				self.vars['I'] = key
+				compressed[key] = {}
+				if 'path' in self.data[key]:
+					compressed[key]['{p}'] = self.compr(self.data[key]['path'])
+				if '_pythonpath' in self.data[key]:
+					compressed[key]['{q}'] = []
+					for s in self.data[key]['_pythonpath']:
+						compressed[key]['{q}'].append(self.compr(s))
+			if self.flags[key] & REQUIRED:
+				paths.append(os.path.join(self.data[key]['path'], self.data[key]['_lib']) if '_lib' in self.data[key] else self.data[key]['path'])
+#		print 'paths=%s'%paths
+		# marshal also seems to work but may cause encoding issues with py4j
+		return (os.path.pathsep.join(paths), json.dumps(compressed) if compress else None)
+
+def read_addon(id=None, dir=None, full=True):
+
+	if id and id in _info and _info[id] is not None and \
+			(_info.flags[id] & COMPLETE or \
+			(not full and '_pythonpath' in _info[id])):
+		return id
+
+	if not dir:
+		dir = '.' if id is None else get_addon_path(id)
+
+	xml = os.path.join(dir, 'addon.xml') if dir else None
+
+	if xml and os.path.isfile(xml):
 		addon = ElementTree(fromstring(quickesc(xml)))
 		id = addon.getroot().attrib['id']
 		if not id in _info:
-			_info[id] = xml2d(addon.getroot())['addon']
-			_info[id]['path'] = os.path.abspath(os.path.dirname(xml))
-			_info[id]['profile'] = os.path.join(_special['profile'], 'addon_data', id)
-			_info[id]['icon'] = 'icon.png'
-			paths = []
+			_info[id] = {}
+		_info[id].update(xml2d(addon.getroot())['addon'])
+		_info[id]['path'] = os.path.abspath(os.path.dirname(xml))
+		_info[id]['profile'] = os.path.join(_special['profile'], 'addon_data', id)
+		_info[id]['icon'] = 'icon.png'
+		paths = []
+		try:
+			_info[id]['_script'] = addon.find('.//extension[@point="xbmc.python.pluginsource"]').attrib['library']
+		except:
 			try:
-				_info[id]['_script'] = addon.find('.//extension[@point="xbmc.python.pluginsource"]').attrib['library']
-			except AttributeError:
-				try:
-					_info[id]['_lib'] = addon.find('.//extension[@point="xbmc.python.module"]').attrib['library']
-					paths = [os.path.join(dir, _info[id]['_lib'])]
-				except KeyError:
-					# no 'library' means it's the top dir
-					paths = [_info[id]['path']]
-				except:
-					pass
+				_info[id]['_lib'] = addon.find('.//extension[@point="xbmc.python.module"]').attrib['library']
+				paths = [os.path.join(dir, _info[id]['_lib'])]
+			except KeyError:
+				# no 'library' means it's the top dir
+				paths = [_info[id]['path']]
+			except:
+				pass
 
+		required = [a['addon'] for a in _info[id]['requires'][0]['import'] \
+			if not a['addon'].startswith('xbmc.')] if 'requires' in _info[id] else []
+
+		if not '_pythonpath' in _info[id]:
 			try:
 				# recurse through dep tree to gather PYTHONPATH
-				for mod in addon.findall('.//requires/import'):
-					dep = mod.attrib['addon']
-					if dep != 'xbmc.python' and not dep in paths and \
-							read_addon(id=dep, full=full) != None:
-						paths.extend(_info[dep]['_pythonpath'].split(os.path.pathsep))
-				_info[id]['_pythonpath'] = os.path.pathsep.join(set(paths))
+				for dep in required:
+					if read_addon(id=dep, full=full) != None:
+						paths.extend(_info[dep]['_pythonpath'])
+						_info.flags[dep] |= REQUIRED
+				_info[id]['_pythonpath'] = list(set(paths))
 			except:
 				traceback.print_exc(file=sys.stdout)
 
-		if full and not id in _settings:
-			read_settings(id)
-			_strings[id] = {}
-			# start with english
-			read_strings(id, 'English')
-			# overlay any non-english strings
-			if not 'english' in _settings['xbmc'][u'language'].lower():
-				read_strings(id, _settings['xbmc'][u'language'])
-
+		if full:
+			for i in [id] + required:
+				if not i in _settings:
+					read_settings(i)
+					_strings[i] = {}
+					# start with english
+					read_strings(i, 'English')
+					# overlay any non-english strings
+					if not 'english' in _settings['xbmc'][u'language'].lower():
+						read_strings(i, _settings['xbmc'][u'language'])
+			_info.flags[id] |= COMPLETE
 		return id
+	if id: print 'Error: %s not found.' % id
 	return None
 
 # see http://nedbatchelder.com/blog/200905/running_a_python_file_as_main_take_2.html
@@ -259,8 +355,6 @@ def load_addon(id):
 
 # see also http://pyunit.sourceforge.net/notes/reloading.html
 #          http://www.indelible.org/ink/python-reloading/
-
-from UserDict import IterableUserDict
 
 class revertableDict(IterableUserDict):
 	"""A dict wrapper to allow reverting to the initial state"""
@@ -295,8 +389,6 @@ def run_addon(pluginurl):
 		os.chdir(addondir)
 		sys.path[0] = addondir
 		if not id in _addons:
-			paths = _info[id]['_pythonpath'].split(os.path.pathsep)
-			sys.path += [p for p in paths if p not in sys.path]
 			load_addon(id)
 		mod, codeobj = _addons[id]
 		xbmcplugin.setargv([mod.__file__, pluginurl])
@@ -317,32 +409,26 @@ def run_addon(pluginurl):
 		sys.argv = argv
 		xbmcplugin.argv0 = xargv0
 
-class xbmcimport:
-	# a finder to amend sys.path on the fly in case an addon
-	# tries to import a non-dep script.module (e.g. classiccinema)
-	def find_module(self, fullname, path=None):
-		id = "script.module.%s" % (fullname)
-		if path is None and not id in _info:
-			id = read_addon(id)
-			if id is not None:
-				lib = os.path.join(_info[id]['path'], _info[id]['_lib'])
-				pms.addPath(lib)
-				sys.path.append(lib)
-		return None
-
 def reset(id=None):
 	__builtin__._mainid = read_addon(id)
 	if _mainid:
+		missing = [p for p in _info[_mainid]['_pythonpath'] if p not in sys.path]
+		if missing:
+			print 'adding missing paths: %s' % missing
+			sys.path.extend(missing)
+			pms.addPath(os.path.pathsep.join(missing))
 		print ""
 		print "Settings:", _settings[_mainid]
 
 try: _settings
 except NameError:
-	sys.meta_path.append(xbmcimport())
+	__builtin__._info = addonDict(pms.getVar('xbmc_info'))
 	__builtin__._settings = {}
 	__builtin__._strings = {}
-	__builtin__._info = {}
 	__builtin__._addons = {}
+	paths = pms.getVar('xbmc_paths')
+	if paths:
+		sys.path.extend([p for p in paths.split(os.path.pathsep) if p not in sys.path])
 	read_xbmc_settings()
 
 try: _mainid
@@ -369,5 +455,4 @@ class mock(object):
 	def __delitem__(self, key): pass
 	def __len__(self): return 3
 	def __iter__(self): return iter([self,self,self])
-
 

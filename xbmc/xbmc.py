@@ -178,8 +178,8 @@ def translatePath(url, asURL=False):
 			return ('file://' if asURL else '') \
 				+ os.path.join(_special[loc], os.path.normpath(path.lstrip('\\/')))
 		if scheme == 'plugin':
-			dir = os.path.join(_special['home'], 'addons', loc)
-			if os.path.isdir(dir):
+			dir = xbmcinit.get_addon_path(loc)
+			if dir:
 				return ('file://' if asURL else '') \
 					+ os.path.join(dir, os.path.normpath(path.lstrip('\\/')))
 	except:
