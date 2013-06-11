@@ -27,6 +27,7 @@ except NameError:
 		_special['userhome'] = _special['home']
 		_special['temp'] = _special['home'] + '/temp'
 		_special['logpath'] = _special['temp']
+		os.environ['OS'] = 'linux'
 	elif sys.platform.startswith('win32'):
 		_special['xbmc'] = main if main else \
 			(os.getenv('PROGRAMFILES(X86)') if 'PROGRAMFILES(X86)' in os.environ \
@@ -36,6 +37,7 @@ except NameError:
 		_special['userhome'] = os.getenv('USERPROFILE')
 		_special['temp'] = _special['home'] + '\\cache'
 		_special['logpath'] = _special['home']
+		os.environ['OS'] = 'win32'
 	elif sys.platform.startswith('darwin'):
 		_special['xbmc'] = main if main else \
 			'/Applications/XBMC.app/Contents/Resources/XBMC'
@@ -44,6 +46,7 @@ except NameError:
 		_special['userhome'] = _special['home']
 		_special['temp'] = os.getenv('HOME') + '.xbmc/temp'
 		_special['logpath'] = os.getenv('HOME') + '/Library/Logs'
+		os.environ['OS'] = 'darwin'
 	mprofile = os.path.join(_special['home'], 'userdata')
 	_special['masterprofile'] = mprofile
 	_special['profile'] = mprofile # FIXME: actually special://masterprofile/profile_name
