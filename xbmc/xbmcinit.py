@@ -10,7 +10,7 @@ from UserDict import IterableUserDict, DictMixin
 try: import simplejson as json
 except: import json
 
-version = '0.3.5'
+version = '0.3.6-dev'
 
 try: _special
 except NameError:
