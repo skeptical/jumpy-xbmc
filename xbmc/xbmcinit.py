@@ -373,7 +373,8 @@ class revertableDict(IterableUserDict):
 
 def run_addon(pluginurl):
 	# execute a 'plugin://' url
-	print '\nrun_addon: %s' % pluginurl
+	url = pluginurl.encode('utf-8') if isinstance(pluginurl, unicode) else pluginurl
+	print '\nrun_addon: %s' % url
 	import xbmc, xbmcplugin
 	# save state
 	home = os.getcwd()
@@ -386,7 +387,7 @@ def run_addon(pluginurl):
 	basemods = revertableDict(sys.modules)
 	try:
 		# reset and run
-		id = urlparse(pluginurl).netloc
+		id = urlparse(url).netloc
 		reset(id)
 		addondir = _info[id]['path']
 		os.chdir(addondir)
@@ -394,7 +395,7 @@ def run_addon(pluginurl):
 		if not id in _addons:
 			load_addon(id)
 		mod, codeobj = _addons[id]
-		xbmcplugin.setargv([mod.__file__, pluginurl])
+		xbmcplugin.setargv([mod.__file__, url])
 		sys.modules['__main__'] = mod
 		sys.modules = basemods
 		exec codeobj in mod.__dict__
