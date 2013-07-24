@@ -119,6 +119,7 @@ else:
 	addondir = os.path.dirname(sys.argv[0])
 	os.chdir(addondir)
 	sys.path[0] = addondir
+	__file__ = sys.argv[0]
 	import xbmcinit
-	execfile(sys.argv[0])
+	execfile(__file__)
 

@@ -120,7 +120,6 @@ class Dialog:
 		print "*** dialog %s ***\n%s <<< %s" % (type, sel, dlg)
 		return sel
 
-
 # mock everything else, mostly
 
 from xbmcinit import mock
@@ -147,6 +146,8 @@ ControlList = \
 ControlProgress = \
 ControlRadioButton = \
 ControlTextBox = mock()
+
+import xbmcplugin
 
 #class DialogProgress:
 
