@@ -206,7 +206,7 @@ def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 	script = argv0
 	if not isFolder:
 		if url.startswith('plugin://'):
-			id = urlparse(url).netloc
+			id = xbmcinit.read_addon(urlparse(url).netloc)
 			script = os.path.join(_info[id]['path'], _info[id]['_script'])
 			itemtype = PMS_UNRESOLVED | getMediaType(listitem)
 		else:
