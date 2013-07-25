@@ -380,7 +380,7 @@ def run_addon(pluginurl):
 	home = os.getcwd()
 	mainid = _mainid
 	main = sys.modules['__main__']
-	path0 = sys.path[0]
+	syspath = sys.path
 	argv = sys.argv
 	xargv0 = xbmcplugin.argv0
 	sysmods = sys.modules
@@ -391,7 +391,6 @@ def run_addon(pluginurl):
 		reset(id)
 		addondir = _info[id]['path']
 		os.chdir(addondir)
-		sys.path[0] = addondir
 		if not id in _addons:
 			load_addon(id)
 		mod, codeobj = _addons[id]
@@ -409,18 +408,18 @@ def run_addon(pluginurl):
 		os.chdir(home)
 		__builtin__._mainid = mainid
 		sys.modules['__main__'] = main
-		sys.path[0] = path0
+		sys.path = syspath
 		sys.argv = argv
 		xbmcplugin.argv0 = xargv0
 
 def reset(id=None):
 	__builtin__._mainid = read_addon(id)
 	if _mainid:
-		missing = [p for p in _info[_mainid]['_pythonpath'] if p not in sys.path]
-		if missing:
-			print 'adding missing paths: %s' % missing
-			sys.path.extend(missing)
-			pms.addPath(os.path.pathsep.join(missing))
+		mainpath = [_info[_mainid]['path']] + _info[_mainid]['_pythonpath']
+		extrapaths = [p for p in xbmc_paths if p not in mainpath]
+		for d in [p for p in mainpath + extrapaths if p in sys.path]:
+			sys.path.remove(d)
+		sys.path = mainpath + sys.path + extrapaths
 		print ""
 		print "Settings:", _settings[_mainid]
 
@@ -431,8 +430,7 @@ except NameError:
 	__builtin__._strings = {}
 	__builtin__._addons = {}
 	paths = pms.getVar('xbmc_paths')
-	if paths:
-		sys.path.extend([p for p in paths.split(os.path.pathsep) if p not in sys.path])
+	__builtin__.xbmc_paths = (paths.split(os.path.pathsep) if paths else [])
 	read_xbmc_settings()
 
 try: _mainid
