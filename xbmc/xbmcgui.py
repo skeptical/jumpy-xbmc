@@ -29,6 +29,7 @@ class ListItem:
 		self.__dict__['thumbnailImage'] = thumbnailImage
 		self.__dict__['path'] = path
 		self.__dict__['type'] = 'VIDEO'
+		self.__dict__['streams'] = []
 		return
 
 	def getLabel(self):
@@ -67,7 +68,6 @@ class ListItem:
 		"""Sets the listitem's infoLabels."""
 		self.__dict__['type'] = type
 		self.__dict__.update(infoLabels)
-		pass
 
 	def setProperty(self, key, value):
 		"""Sets a listitem property, similar to an infolabel."""
@@ -84,6 +84,11 @@ class ListItem:
 	def setPath(self, path):
 		"""Sets the listitem's path."""
 		self.__dict__['path'] = path
+
+	def addStreamInfo(self, type, values):
+		"""Add a stream with details."""
+		values['type'] = type
+		self.__dict__['streams'].append(values)
 
 # xbmc/interfaces/python/xbmcmodule/dialog.cpp
 class Dialog:
