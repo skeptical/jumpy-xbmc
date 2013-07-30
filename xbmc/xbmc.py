@@ -1,4 +1,4 @@
-import os.path, csv, traceback
+import os.path, csv, traceback, zlib
 from urlparse import urlparse
 from cStringIO import StringIO
 import xbmcplugin, xbmcgui, xbmcinit
@@ -163,7 +163,8 @@ def getGlobalIdleTime():
 
 def getCacheThumbName(path):
 	"""Returns a thumb cache filename."""
-	return ""
+	# see xbmc/interfaces/legacy/ModuleXbmc.cpp:370
+	return '%08x.tbn' % zlib.crc32(path)
 
 def makeLegalFilename(filename, fatX=None):
 	"""Returns a legal filename or path as a string."""
@@ -215,8 +216,13 @@ class Player:
 
 	def __init__(self, core=None):
 		"""Creates a new Player with as default the xbmc music playlist."""
-		self.playlist = None
-		self.playing = True;
+		self.setup()
+
+	def setup(self):
+		if not 'playlist' in self.__dict__:
+			self.playlist = None
+		if not 'playing' in self.__dict__:
+			self.playing = False
 
 	def play(self, item=None, listitem=None, windowed=None):
 		"""Play this item."""
@@ -230,9 +236,15 @@ class Player:
 				self.playlist.add(item, listitem)
 		elif self.playlist is not None:
 			self.index += 1
-		# pretend we played something in case 'self' is actually a derived class
+		# make sure we're initialized and pretend to play
+		# in case 'self' is actually a derived class
+		self.setup()
+		self.playing = True
+#		try: self.onPlayBackStarted()
+#		except: pass
 		try: self.onPlayBackEnded()
 		except: pass
+		self.playing = False
 
 	def stop(self):
 		"""Stop playing."""
@@ -276,6 +288,7 @@ class Player:
 
 	def isPlaying(self):
 		"""returns True is xbmc is playing a file."""
+		self.setup()
 		return self.playing
 
 	def isPlayingAudio(self):
@@ -305,12 +318,8 @@ class Player:
 	def getTime(self):
 		"""Returns the current time of the current playing media as fractional seconds."""
 		# pretend to have played for 1 second
-		if self.playing:
-			self.playing = False
-			return 1
-		else:
-			self.playing = True
-			raise Exception("fake playback ended!")
+		self.setup()
+		return 1 if self.playing else 0
 
 	def seekTime(self):
 		"""Seeks the specified amount of time as fractional seconds."""
