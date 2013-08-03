@@ -385,6 +385,8 @@ def run_addon(pluginurl):
 	xargv0 = xbmcplugin.argv0
 	sysmods = sys.modules
 	basemods = revertableDict(sys.modules)
+	# pull any state-sensitive modules to force re-import
+	sensitives = [sys.modules.pop(m) for m in ['urllib', 'urllib2'] if m in sys.modules]
 	try:
 		# reset and run
 		id = urlparse(url).netloc
@@ -405,6 +407,8 @@ def run_addon(pluginurl):
 		# restore state
 		basemods.revert()
 		sys.modules = sysmods
+		for m in sensitives:
+			sys.modules[m.__name__] = m
 		os.chdir(home)
 		__builtin__._mainid = mainid
 		sys.modules['__main__'] = main
