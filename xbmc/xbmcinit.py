@@ -1,7 +1,6 @@
-import __builtin__, os, sys, platform, atexit, traceback, re, jumpy
+import __builtin__, os, sys, platform, atexit, traceback, re, pprint, jumpy
 import imp, types, marshal
 from xml.etree.ElementTree import ElementTree, fromstring
-#from xml.dom.minidom import parse
 from xml.dom.minidom import parseString
 from xml.sax.saxutils import escape, unescape
 from itertools import groupby
@@ -9,6 +8,15 @@ from urlparse import urlparse
 from UserDict import IterableUserDict, DictMixin
 try: import simplejson as json
 except: import json
+__builtin__.have_bs4 = False
+try:
+	from bs4 import BeautifulSoup
+	# bs4 won't parse xml without lxml
+	# see https://bugs.launchpad.net/beautifulsoup/+bug/1181589
+	import lxml
+	have_bs4 = True
+	print 'using bs4'
+except: pass
 
 version = '0.3.6-dev'
 
@@ -112,13 +120,23 @@ def read_settings(id):
 			]:
 		if os.path.isfile(f):
 			print "Reading", f
-			xml = parsexml(quickesc(f))
-			for tag in xml.getElementsByTagName('setting'):
-				key = tag.getAttribute('id')
-				val = unesc(tag.getAttribute('value') if tag.hasAttribute('value') else tag.getAttribute('default'))
-				if not val == '' and sensitive.search(key.lower()):
-					val = masked(val)
-				_settings[id][key] = val
+			if have_bs4:
+				xml = BeautifulSoup(open(f).read(), 'xml')
+				for tag in xml.findAll('setting'):
+					key = tag.get('id')
+					if key:
+						val = tag.get('value' if 'value' in tag.attrs else 'default') or ''
+						if not val == '' and sensitive.search(key.lower()):
+							val = masked(val)
+						_settings[id][key] = val
+			else:
+				xml = parsexml(quickesc(f))
+				for tag in xml.getElementsByTagName('setting'):
+					key = tag.getAttribute('id')
+					val = unesc(tag.getAttribute('value') if tag.hasAttribute('value') else tag.getAttribute('default'))
+					if not val == '' and sensitive.search(key.lower()):
+						val = masked(val)
+					_settings[id][key] = val
 
 def save_settings(id):
 	print 'Saving settings: %s' % id
@@ -145,13 +163,17 @@ def read_strings(id, lang):
 		f = os.path.join(_info[id]['path'], 'resources', 'language', l, 'strings.xml')
 		if os.path.isfile(f):
 			print "Reading", f
-			xml = parsexml(quickesc(f))
-			for tag in xml.getElementsByTagName('string'):
-				frags = []
-				for node in tag.childNodes:
-					frags.append(node.data)
-				_strings[id][tag.getAttribute('id')] = unesc(''.join(frags))
-			return
+			if have_bs4:
+				xml = BeautifulSoup(open(f).read(), 'xml')
+				for tag in xml.findAll('string'):
+					_strings[id][tag['id']] = tag.string
+			else:
+				xml = parsexml(quickesc(f))
+				for tag in xml.getElementsByTagName('string'):
+					frags = []
+					for node in tag.childNodes:
+						frags.append(node.data)
+					_strings[id][tag.getAttribute('id')] = unesc(''.join(frags))
 
 def read_dialogs():
 	__builtin__._dialogs = {}
