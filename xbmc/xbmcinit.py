@@ -18,7 +18,7 @@ try:
 	print 'using bs4'
 except: pass
 
-version = '0.3.6-dev'
+version = '0.3.6'
 
 try: _special
 except NameError:
