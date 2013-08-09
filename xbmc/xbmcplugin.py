@@ -215,7 +215,7 @@ def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 			return True
 	label = striptags(listitem.getLabel())
 	if label and url:
-		pms.addItem(itemtype, label, [script, url],
+		pms.addItem(itemtype, pms.esc(label), [script, url],
 			fullPath(url, listitem.getProperty('thumbnailImage')))
 	return True
 
@@ -266,7 +266,7 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	if name == "" or name == None: name = "Item"
 	name = name + "" if stack < 1 else " %d" % stack
 
-	pms.addItem(media, name, url, fullPath(url, listitem.getProperty('thumbnailImage')))
+	pms.addItem(media, pms.esc(name), url, fullPath(url, listitem.getProperty('thumbnailImage')))
 	print "*** setResolvedUrl ***"
 	print "raw : %s" % listitem.getProperty('path')
 	print "name: %s" % name

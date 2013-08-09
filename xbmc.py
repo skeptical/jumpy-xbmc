@@ -85,7 +85,7 @@ if len(sys.argv) == 1:
 			pms.addPath(os.path.pathsep.join(info['_pythonpath']))
 			script = os.path.join(info['path'], info['_script'])
 			thumb = os.path.join(info['path'], info['icon'])
-			pms.addItem(PMS_FOLDER, "[xbmc]   %s" % info['name'], \
+			pms.addItem(PMS_FOLDER, "[xbmc]   %s" % pms.esc(info['name']), \
 				[sys.argv[0], script, 'plugin://' + id + '/'], thumb)
 		except KeyError: pass
 		except:
