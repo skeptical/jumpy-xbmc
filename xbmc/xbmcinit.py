@@ -8,15 +8,21 @@ from urlparse import urlparse
 from UserDict import IterableUserDict, DictMixin
 try: import simplejson as json
 except: import json
-__builtin__.have_bs4 = False
+
+__builtin__.got_soup = False
 try:
 	from bs4 import BeautifulSoup
-	# bs4 won't parse xml without lxml
-	# see https://bugs.launchpad.net/beautifulsoup/+bug/1181589
+	# bs4 won't parse xml without lxml: https://bugs.launchpad.net/beautifulsoup/+bug/1181589
 	import lxml
-	have_bs4 = True
-	print 'using bs4'
-except: pass
+	got_soup = 4
+	def xmlsoup(f): return BeautifulSoup(open(f).read(), 'xml')
+except:
+	try:
+		from BeautifulSoup import BeautifulStoneSoup
+		got_soup = 3
+		def xmlsoup(f): return BeautifulStoneSoup(open(f).read())
+	except: pass
+pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup%s' % got_soup), once=True)
 
 version = '0.3.7-dev'
 
@@ -120,8 +126,8 @@ def read_settings(id):
 			]:
 		if os.path.isfile(f):
 			print "Reading", f
-			if have_bs4:
-				xml = BeautifulSoup(open(f).read(), 'xml')
+			if got_soup:
+				xml = xmlsoup(f)
 				for tag in xml.findAll('setting'):
 					key = tag.get('id')
 					if key:
@@ -163,8 +169,8 @@ def read_strings(id, lang):
 		f = os.path.join(_info[id]['path'], 'resources', 'language', l, 'strings.xml')
 		if os.path.isfile(f):
 			print "Reading", f
-			if have_bs4:
-				xml = BeautifulSoup(open(f).read(), 'xml')
+			if got_soup:
+				xml = xmlsoup(f)
 				for tag in xml.findAll('string'):
 					_strings[id][tag['id']] = tag.string
 			else:
