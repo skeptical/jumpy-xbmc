@@ -366,23 +366,28 @@ def read_addon(id=None, dir=None, full=True):
 def load_addon(id):
 	print 'loading %s' % id
 	script = os.path.join(_info[id]['path'], _info[id]['_script'])
-	pyc = '%sc' % script
-	if os.path.exists(pyc):
-		src = open(pyc, 'rb')
-		codeobj = marshal.loads(src.read()[8:])
+	if id in _addons:
+		mod, codeobj = _addons[id]
 	else:
-		src = open(script)
-		code = src.read()
-		if not code or code[-1] != '\n':
-			code += '\n'
-		codeobj = compile(code, script, 'exec')
-	src.close()
+		pyc = '%sc' % script
+		if os.path.exists(pyc):
+			src = open(pyc, 'rb')
+			codeobj = marshal.loads(src.read()[8:])
+		else:
+			src = open(script)
+			code = src.read()
+			if not code or code[-1] != '\n':
+				code += '\n'
+			codeobj = compile(code, script, 'exec')
+		src.close()
+	# always re-instantiate the module
 	mod = types.ModuleType('__main__')
 #	mod = imp.new_module('__main__') # also works
 	mod.__file__ = script
 	mod.__path__ = [os.path.dirname(script)]
 	mod.__builtins__ = sys.modules['__builtin__']
 	_addons[id] = (mod, codeobj)
+	return _addons[id]
 
 # see also http://pyunit.sourceforge.net/notes/reloading.html
 #          http://www.indelible.org/ink/python-reloading/
@@ -414,16 +419,16 @@ def run_addon(pluginurl):
 	sysmods = sys.modules
 	basemods = revertableDict(sys.modules)
 	# pull any state-sensitive modules to force re-import
-	sensitives = [sys.modules.pop(m) for m in ['urllib', 'urllib2'] if m in sys.modules]
+	sensitives = [sys.modules.pop(m) for m in [
+			'urllib', 'urllib2', 'cookielib'
+		] if m in sys.modules]
 	try:
 		# reset and run
 		id = urlparse(url).netloc
 		reset(id)
 		addondir = _info[id]['path']
 		os.chdir(addondir)
-		if not id in _addons:
-			load_addon(id)
-		mod, codeobj = _addons[id]
+		mod, codeobj = load_addon(id)
 		xbmcplugin.setargv([mod.__file__, url])
 		sys.modules['__main__'] = mod
 		sys.modules = basemods
