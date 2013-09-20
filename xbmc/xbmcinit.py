@@ -29,34 +29,34 @@ version = '0.3.7'
 try: _special
 except NameError:
 	__builtin__._special = {}
-	home = os.getenv('xbmc_home') if 'xbmc_home' in os.environ else None
-	main = os.getenv('xbmc_main') if 'xbmc_main' in os.environ else None
+	xbmc_home = os.getenv('xbmc_home') if 'xbmc_home' in os.environ else pms.getProperty('xbmc.path')
+	xbmc_main = os.getenv('xbmc_main') if 'xbmc_main' in os.environ else pms.getProperty('xbmc.main.path')
 	if sys.platform.startswith('linux'):
 		# FIXME: this won't find xbmc if it's installed to another prefix
-		_special['xbmc'] = main if main else \
+		_special['xbmc'] = xbmc_main if xbmc_main else \
 			('/usr/local/share/xbmc' if os.path.exists('/usr/local/share/xbmc') \
 			else '/usr/share/xbmc')
 		_special['xbmcbin'] = _special['xbmc'].replace('share', 'lib')
-		_special['home'] = home if home else os.getenv('HOME') + '/.xbmc'
+		_special['home'] = xbmc_home if xbmc_home else os.getenv('HOME') + '/.xbmc'
 		_special['userhome'] = _special['home']
 		_special['temp'] = _special['home'] + '/temp'
 		_special['logpath'] = _special['temp']
 		os.environ['OS'] = 'linux'
 	elif sys.platform.startswith('win32'):
-		_special['xbmc'] = main if main else \
+		_special['xbmc'] = xbmc_main if xbmc_main else \
 			(os.getenv('PROGRAMFILES(X86)') if 'PROGRAMFILES(X86)' in os.environ \
 			else os.getenv('PROGRAMFILES')) + '\\XBMC'
 		_special['xbmcbin'] = _special['xbmc']
-		_special['home'] = home if home else os.getenv('APPDATA') + '\\XBMC'
+		_special['home'] = xbmc_home if xbmc_home else os.getenv('APPDATA') + '\\XBMC'
 		_special['userhome'] = os.getenv('USERPROFILE')
 		_special['temp'] = _special['home'] + '\\cache'
 		_special['logpath'] = _special['home']
 		os.environ['OS'] = 'win32'
 	elif sys.platform.startswith('darwin'):
-		_special['xbmc'] = main if main else \
+		_special['xbmc'] = xbmc_main if xbmc_main else \
 			'/Applications/XBMC.app/Contents/Resources/XBMC'
 		_special['xbmcbin'] = _special['xbmc']
-		_special['home'] = home if home else os.getenv('HOME') + '/Library/Application Support/XBMC'
+		_special['home'] = xbmc_home if xbmc_home else os.getenv('HOME') + '/Library/Application Support/XBMC'
 		_special['userhome'] = _special['home']
 		_special['temp'] = os.getenv('HOME') + '.xbmc/temp'
 		_special['logpath'] = os.getenv('HOME') + '/Library/Logs'

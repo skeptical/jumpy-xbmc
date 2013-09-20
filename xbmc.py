@@ -9,17 +9,11 @@ if len(sys.argv) == 1:
 
 	# set up
 
-	xbmc_home = pms.getProperty('xbmc.path')
-	if xbmc_home != "" and xbmc_home is not None:
-		pms.setEnv('xbmc_home', xbmc_home)
-		os.environ['xbmc_home'] = xbmc_home
-	xbmc_main = pms.getProperty('xbmc.main.path')
-	if xbmc_main != "" and xbmc_main is not None:
-		pms.setEnv('xbmc_main', xbmc_main)
-		os.environ['xbmc_main'] = xbmc_main
+	import xbmc.xbmcinit as xbmcinit
+	pms.setEnv('xbmc_main', _special['xbmc'])
+	pms.setEnv('xbmc_home', _special['home'])
 
-	import xbmc.xbmcinit
-	print '\njumpy-xbmc version %s\n' % xbmc.xbmcinit.version
+	print '\njumpy-xbmc version %s\n' % xbmcinit.version
 	print 'special://xbmc=%s' % _special['xbmc']
 	print 'special://home=%s' % _special['home']
 
@@ -62,7 +56,7 @@ if len(sys.argv) == 1:
 	ignore = re.compile(r'(xbmc|repository|skin|visualization)\.')
 
 	for dir in sorted(os.listdir(addonsdir), reverse=True):
-		id = xbmc.xbmcinit.read_addon(dir=os.path.join(addonsdir, dir), full=False)
+		id = xbmcinit.read_addon(dir=os.path.join(addonsdir, dir), full=False)
 		if not id : continue;
 		if id in disabled or ignore.match(id):
 			del _info[id]
