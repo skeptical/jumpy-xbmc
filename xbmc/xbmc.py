@@ -364,10 +364,10 @@ class PlayListItem(xbmcgui.ListItem):
 		"""Creates a new PlaylistItem which can be added to a PlayList."""
 		xbmcgui.ListItem.__init__(self)
 		if listitem is not None:
-			self.__dict__.update(listitem.__dict__)
+			self.data.update(listitem.data)
 		# url is sometimes 'False'
 		if url is not None and url:
-			self.__dict__['path'] = url
+			self.data['path'] = url
 
 	def getdescription(self):
 		"""Returns the description of this PlayListItem."""
@@ -379,7 +379,7 @@ class PlayListItem(xbmcgui.ListItem):
 
 	def getfilename(self):
 		"""Returns the filename of this PlayListItem."""
-		return self.__dict__['path']
+		return self.data['path']
 
 class PlayList:
 
@@ -393,7 +393,7 @@ class PlayList:
 
 	def add(self, url, listitem=None, index=None):
 		"""Adds a new file to the playlist."""
-		print "**** PlayList.add ****", url, '' if listitem is None else listitem.__dict__
+		print "**** PlayList.add ****", url, '' if listitem is None else listitem.data
 		if not isinstance(url, list):
 			url = [url]
 		for u in url:

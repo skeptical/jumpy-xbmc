@@ -1,3 +1,4 @@
+from UserDict import DictMixin
 import xbmcinit
 
 def getCurrentWindowId():
@@ -19,42 +20,63 @@ ICON_OVERLAY_UNWATCHED = 6
 ICON_OVERLAY_WATCHED = 7
 ICON_OVERLAY_HD = 8
 
+class case_insensitive_dict(DictMixin):
+	def __init__(self):
+		self.data = {}
+
+	def __getitem__(self, key):
+		return self.data[key.lower()]
+
+	def __setitem__(self, key, item):
+		self.data[key.lower()] = item
+
+	def __delitem__(self, key):
+		if key.lower() in self.data:
+			del self.data[key.lower()]
+		else:
+			raise KeyError(key)
+
+	def keys(self):
+		return self.data.keys()
+
+
 # xbmc/interfaces/python/xbmcmodule/listitem.cpp
 class ListItem:
 
 	def __init__(self, label=None, label2=None, iconImage=None, thumbnailImage=None, path=None):
-		self.__dict__['label'] = label
-		self.__dict__['label2'] = label2
-		self.__dict__['iconImage'] = iconImage
-		self.__dict__['thumbnailImage'] = thumbnailImage
-		self.__dict__['path'] = path
-		self.__dict__['type'] = 'VIDEO'
-		self.__dict__['streams'] = []
+		self.data = case_insensitive_dict()
+		self.data['label'] = label
+		self.data['label2'] = label2
+		self.data['iconImage'] = iconImage
+		self.data['thumbnailImage'] = thumbnailImage
+		self.data['path'] = path
+		self.data['type'] = 'VIDEO'
+		self.data['streams'] = []
 		return
 
 	def getLabel(self):
 		"""Returns the listitem label."""
-		return self.__dict__['label']
+		return self.data['label']
 
 	def getLabel2(self):
 		"""Returns the listitem's second label."""
-		return self.__dict__['label2']
+		return self.data['label2']
 
 	def setLabel(self, label):
 		"""Sets the listitem's label."""
-		self.__dict__['label'] = label
+		self.data['label'] = label
 
 	def setLabel2(self, label2):
 		"""Sets the listitem's second label."""
-		self.__dict__['label2'] = label2
+		self.data['label2'] = label2
 
 	def setIconImage(self, icon):
 		"""Sets the listitem's icon image."""
-		self.__dict__['iconImage'] = icon
+		self.data['iconImage'] = icon
 
 	def setThumbnailImage(self, thumb):
 		"""Sets the listitem's thumbnail image."""
-		self.__dict__['thumbnailImage'] = thumb
+		self.data['thumbnailImage'] = thumb
 
 	def select(self, selected):
 		"""Sets the listitem's selected status."""
@@ -66,16 +88,16 @@ class ListItem:
 
 	def setInfo(self, type, infoLabels):
 		"""Sets the listitem's infoLabels."""
-		self.__dict__['type'] = type
-		self.__dict__.update(infoLabels)
+		self.data['type'] = type
+		self.data.update(infoLabels)
 
 	def setProperty(self, key, value):
 		"""Sets a listitem property, similar to an infolabel."""
-		self.__dict__[key] = value
+		self.data[key] = value
 
 	def getProperty(self, key):
 		"""Returns a listitem property as a string, similar to an infolabel."""
-		return (self.__dict__[key] if key in self.__dict__ else None)
+		return (self.data[key] if key in self.data else None)
 
 	def addContextMenuItems(self, items, replaceItems=None):
 		"""Adds item to the context menu for media lists."""
@@ -83,12 +105,13 @@ class ListItem:
 
 	def setPath(self, path):
 		"""Sets the listitem's path."""
-		self.__dict__['path'] = path
+		self.data['path'] = path
 
 	def addStreamInfo(self, type, values):
 		"""Add a stream with details."""
+		print "*** addStreamInfo ***\n%s" % [type, values]
 		values['type'] = type
-		self.__dict__['streams'].append(values)
+		self.data['streams'].append({k.lower():values[k] for k in values.keys()})
 
 # xbmc/interfaces/python/xbmcmodule/dialog.cpp
 class Dialog:
