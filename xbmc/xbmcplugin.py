@@ -2,6 +2,7 @@ import os, sys
 import urllib, re
 from urlparse import urlparse
 from ast import literal_eval
+#import pprint
 
 import jumpy, xbmcinit, xbmc
 
@@ -82,23 +83,6 @@ def setargv(argv):
 
 setargv(sys.argv)
 
-def using_librtmp():
-	global librtmp_checked, librtmp
-	if not librtmp_checked:
-		librtmp = pms.getVar('using_librtmp') == 'true'
-		librtmp_checked = True
-	return librtmp
-
-def getMediaType(listitem):
-	itemtype = listitem.getProperty('type').strip().upper()
-#	print 'mediatype=%s' % itemtype
-	if itemtype == "VIDEO":
-		return PMS_VIDEO
-	elif itemtype == "AUDIO":
-		return PMS_AUDIO
-	else:
-		return PMS_UNKNOWN
-
 def fullPath(base, path):
 #	print 'fullPath %s' % [base, path]
 	if path == None:
@@ -118,6 +102,45 @@ def striptags(label):
 	if label is not None:
 		return ltags.sub('', label)
 	return label
+
+def getMediaType(listitem):
+	mediatype = listitem.getProperty('type').strip().upper()
+#	print 'mediatype=%s' % mediatype
+	if mediatype == "VIDEO":
+		return PMS_VIDEO
+	elif mediatype == "AUDIO":
+		return PMS_AUDIO
+	else:
+		return PMS_UNKNOWN
+
+#	see xbmc/interfaces/legacy/ListItem.h
+
+def mediaInfo(listitem):
+	m = {}
+	for key in [ 'duration', 'streams' ]:
+		if key in listitem.data and listitem.data[key]:
+			m[key] = str(listitem.data[key])
+	# duration is given either as minutes or hh:mm:ss
+	if 'duration' in m:
+		m['duration'] = str(m['duration']) + ('' if ':' in str(m['duration']) else ':00')
+	return m if m else None
+
+def resolve(url, listitem, isFolder=False):
+#	pprint.pprint(listitem.data.data)
+	name = striptags(listitem.getLabel())
+	if not name: name = striptags(listitem.getProperty('title'))
+	if not name: name = pms.getFolderName()
+	if not name: name = "Item"
+	return (PMS_FOLDER if isFolder else getMediaType(listitem), name, \
+		fullPath(url, listitem.getProperty('thumbnailImage')), \
+		None if isFolder else mediaInfo(listitem))
+
+def using_librtmp():
+	global librtmp_checked, librtmp
+	if not librtmp_checked:
+		librtmp = pms.getVar('using_librtmp') == 'true'
+		librtmp_checked = True
+	return librtmp
 
 def rtmpsplit(url, listitem):
 	sargs = []
@@ -202,21 +225,22 @@ def librtmpify(url, listitem):
 
 def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 	"""Callback function to pass directory contents back to XBMC."""
-	itemtype = PMS_FOLDER
+	if not url:
+		return False
 	script = argv0
+	state = 0
 	if not isFolder:
 		if url.startswith('plugin://'):
 			id = xbmcinit.read_addon(urlparse(url).netloc)
 			script = os.path.join(_info[id]['path'], _info[id]['_script'])
-			itemtype = PMS_UNRESOLVED | getMediaType(listitem)
+			state = PMS_UNRESOLVED
 		else:
 			listitem.setProperty('path', url)
 			setResolvedUrl(handle, True, listitem, 0)
 			return True
-	label = striptags(listitem.getLabel())
-	if label and url:
-		pms.addItem(itemtype, pms.esc(label), [script, url],
-			fullPath(url, listitem.getProperty('thumbnailImage')))
+	print "*** addDirectoryItem ***"
+	mediatype, name, thumb, mediainfo = resolve(url, listitem, isFolder)
+	pms.addItem(state|mediatype, pms.esc(name), [script, url], thumb, mediainfo)
 	return True
 
 def addDirectoryItems(handle, items, totalItems=None):
@@ -244,12 +268,6 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	elif url.startswith('plugin://'):
 		xbmcinit.run_addon(url)
 		return
-#		dir = os.path.dirname(xbmc.translatePath(url.split('?')[0]))
-#		id = xbmcinit.read_addon(dir, full=False)
-#		info = _info[id]
-#		pms.addPath(info['_pythonpath'])
-#		url = [os.path.join(info['path'], info['_script']), url]
-#		media = PMS_UNRESOLVED
 
 	# see xbmc/filesystem/StackDirectory.cpp
 	elif url.startswith('stack://'):
@@ -260,17 +278,14 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 			ct += 1
 		return
 
-	name = striptags(listitem.getLabel())
-	if name == "" or name == None: name = striptags(listitem.getProperty('title'))
-	if name == "" or name == None: name = pms.getFolderName()
-	if name == "" or name == None: name = "Item"
+	mediatype, name, thumb, mediainfo = resolve(url, listitem)
 	name = name + "" if stack < 1 else " %d" % stack
 
-	pms.addItem(media, pms.esc(name), url, fullPath(url, listitem.getProperty('thumbnailImage')))
+	pms.addItem(mediatype, pms.esc(name), url, thumb, mediainfo)
 	print "*** setResolvedUrl ***"
 	print "raw : %s" % listitem.getProperty('path')
 	print "name: %s" % name
-	print "type: %d" % media
+	print "type: %d" % mediatype
 	print "url :",url
 
 def endOfDirectory(handle, succeeded=None, updateListing=None, cacheToDisc=None):
