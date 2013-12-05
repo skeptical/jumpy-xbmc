@@ -13,6 +13,16 @@ if len(sys.argv) == 1:
 	pms.setEnv('xbmc_main', _special['xbmc'])
 	pms.setEnv('xbmc_home', _special['home'])
 
+	pms.setInfo({
+		'_title' : 'jumpy-xbmc',
+		'_desc'  : 'Run your XBMC addons in ${PMS}.\n\nNo special setup required other than installing XBMC.',
+		'_icon'  : '${home}/xbmc.png',
+		'_link'    : '[Readme](http://skeptical.github.io/jumpy/readme.html#XBMC)\n[Addons](http://wiki.xbmc.org/index.php?title=Category:All_add-ons)',
+		'_version' : xbmcinit.version,
+		'$xbmc.main.path' : (_special['xbmc'], 'path to xbmc program folder'),
+		'$xbmc.home.path' : (_special['home'], 'path to xbmc home folder')
+	})
+
 	print '\njumpy-xbmc version %s\n' % xbmcinit.version
 	print 'special://xbmc=%s' % _special['xbmc']
 	print 'special://home=%s' % _special['home']
