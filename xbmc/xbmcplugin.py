@@ -116,10 +116,7 @@ def getMediaType(listitem):
 #	see xbmc/interfaces/legacy/ListItem.h
 
 def mediaInfo(listitem):
-	m = {}
-	for key in [ 'duration', 'streams' ]:
-		if key in listitem.data and listitem.data[key]:
-			m[key] = str(listitem.data[key])
+	m = {k:listitem.data[k] for k in ['duration', 'streams'] if k in listitem.data}
 	# duration is given either as minutes or hh:mm:ss
 	if 'duration' in m:
 		m['duration'] = str(m['duration']) + ('' if ':' in str(m['duration']) else ':00')

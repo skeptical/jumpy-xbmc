@@ -109,7 +109,7 @@ class ListItem:
 
 	def addStreamInfo(self, type, values):
 		"""Add a stream with details."""
-		print "*** addStreamInfo ***\n%s" % [type, values]
+		print "*** addStreamInfo ***", [type, values]
 		values['type'] = type
 		self.data['streams'].append({k.lower():values[k] for k in values.keys()})
 
