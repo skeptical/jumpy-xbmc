@@ -403,10 +403,12 @@ class PlayList:
 				index += 1
 			else:
 				self.items.append(PlayListItem(u, item))
-			xbmcplugin.setResolvedUrl(0, True, item)
+#			xbmcplugin.setResolvedUrl(0, True, item)
+			xbmcplugin.addDirectoryItem(0, u, item)
 
 	def load(self, filename):
 		"""Load a playlist."""
+		print "**** PlayList.load ****", url, filename
 		pass
 
 	def remove(self, filename):

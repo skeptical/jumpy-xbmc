@@ -404,10 +404,22 @@ class revertableDict(IterableUserDict):
 	def clear(self):
 		self.revert()
 
-def run_addon(pluginurl):
-	# execute a 'plugin://' url
+jobs = []
+
+def run_addon(pluginurl=None):
+	# execute 'plugin://' urls, one at a time
+	global jobs
+	queued = False
+	if not pluginurl:
+		pluginurl = jobs[0]
+		queued = True
+	else:
+		jobs.append(pluginurl)
+		if len(jobs) > 1:
+			print 'queueing: %s' % pluginurl
+			return
 	url = pluginurl.encode('utf-8') if isinstance(pluginurl, unicode) else pluginurl
-	print '\nrun_addon: %s' % url
+	print '\nrun_addon%s: %s' % (' (queued)' if queued else '', url)
 	import xbmc, xbmcplugin
 	# save state
 	home = os.getcwd()
@@ -448,6 +460,10 @@ def run_addon(pluginurl):
 		sys.path = syspath
 		sys.argv = argv
 		xbmcplugin.argv0 = xargv0
+		del jobs[0]
+		if len(jobs):
+			run_addon()
+
 
 def reset(id=None):
 	__builtin__._mainid = read_addon(id)
