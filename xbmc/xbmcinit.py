@@ -318,6 +318,8 @@ def read_addon(id=None, dir=None, full=True):
 		_info[id]['path'] = os.path.abspath(os.path.dirname(xml))
 		_info[id]['profile'] = os.path.join(_special['profile'], 'addon_data', id)
 		_info[id]['icon'] = 'icon.png'
+		provides = addon.find('.//extension/provides')
+		_info[id]['provides'] = (provides.text if provides is not None else None)
 		paths = []
 		try:
 			_info[id]['_script'] = addon.find('.//extension[@point="xbmc.python.pluginsource"]').attrib['library']

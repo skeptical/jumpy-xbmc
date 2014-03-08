@@ -105,11 +105,16 @@ def striptags(label):
 
 def getMediaType(listitem):
 	mediatype = listitem.getProperty('type').strip().upper()
+	if mediatype is None and _info[_mainid]['provides'] is not None:
+		# try the addon's primary media type
+		mediatype = _info[_mainid]['provides'].strip().split(' ')[0].upper()
 #	print 'mediatype=%s' % mediatype
 	if mediatype == "VIDEO":
 		return PMS_VIDEO
-	elif mediatype == "AUDIO":
+	elif mediatype == "MUSIC" or mediatype == "AUDIO":
 		return PMS_AUDIO
+	elif mediatype == "PICTURE" or mediatype == "IMAGE":
+		return PMS_IMAGE
 	else:
 		return PMS_UNKNOWN
 
