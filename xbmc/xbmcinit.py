@@ -24,7 +24,7 @@ except:
 	except: pass
 pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup%s' % got_soup), once=True)
 
-version = '0.3.9b'
+version = '0.3.9c'
 
 try: _special
 except NameError:
@@ -327,6 +327,9 @@ def read_addon(id=None, dir=None, full=True):
 			try:
 				_info[id]['_lib'] = addon.find('.//extension[@point="xbmc.python.module"]').attrib['library']
 				paths = [os.path.join(dir, _info[id]['_lib'])]
+				# hack
+				if id == 'script.module.urlresolver':
+					paths.append(os.path.join(paths[0], 'urlresolver', 'plugins'))
 			except KeyError:
 				# no 'library' means it's the top dir
 				paths = [_info[id]['path']]
