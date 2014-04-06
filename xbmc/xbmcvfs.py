@@ -45,23 +45,22 @@ def listdir(path):
 
 class File:
 
-	def __init__(path, mode='r'):
+	def __init__(self, path, mode='r'):
 		self.path = translatePath(path);
 		self.file = open(self.path, mode)
-		return self.file
 
-	def read(n=-1):
+	def read(self, n=-1):
 		return self.file.read(n)
 
-	def write(b):
+	def write(self, b):
 		return self.file.write(b)
 
-	def size():
+	def size(self):
 		return os.path.getsize(self.path)
 
-	def seek(offset, whence=0):
+	def seek(self, offset, whence=0):
 		return self.file.seek(offset, whence)
 
-	def close():
+	def close(self):
 		self.file.close()
 
