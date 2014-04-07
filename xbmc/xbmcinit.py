@@ -24,7 +24,7 @@ except:
 	except: pass
 pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup%s' % got_soup), once=True)
 
-version = '0.3.9c'
+version = '0.3.10'
 
 try: _special
 except NameError:
