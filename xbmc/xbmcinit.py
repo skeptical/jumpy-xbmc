@@ -336,8 +336,10 @@ def read_addon(id=None, dir=None, full=True):
 			except:
 				pass
 
-		required = [a['addon'] for a in _info[id]['requires'][0]['import'] \
-			if not a['addon'].startswith('xbmc.')] if 'requires' in _info[id] else []
+		try:
+			required = [a['addon'] for a in _info[id]['requires'][0]['import'] if not a['addon'].startswith('xbmc.')]
+		except:
+			required = []
 
 		if not '_pythonpath' in _info[id]:
 			try:
