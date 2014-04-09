@@ -72,7 +72,7 @@ if len(sys.argv) == 1:
 			del _info[id]
 			continue
 		try:
-			if '_script' in _info[id]:
+			if '_script' in _info[id] and _info[id]['_script']:
 				addons.append(id)
 		except KeyError: pass
 		except:

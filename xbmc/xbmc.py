@@ -1,4 +1,4 @@
-import os.path, csv, traceback, zlib
+import os.path, csv, traceback, zlib, UserList
 from urlparse import urlparse
 from cStringIO import StringIO
 import xbmcplugin, xbmcgui, xbmcinit
@@ -155,6 +155,11 @@ def enableNavSounds(yesNo):
 
 def getCondVisibility(condition):
 	"""Returns True (1) or False (0) as a bool."""
+	cat, prop, val, x = (condition + '...').split('.')[:4]
+	if cat == 'system':
+		if prop == 'platform':
+			p = {'linux' : 'linux', 'windows' : 'win32', 'osx' : 'darwin'}
+			return sys.platform.startswith(p[val]) if val in p else False
 	return False;
 
 def getGlobalIdleTime():
@@ -228,14 +233,13 @@ class Player:
 		"""Play this item."""
 		print "**** play ****",item, listitem
 		if item is not None:
-			self.index = 0
 			if isinstance(item, PlayList):
 				self.playlist = item
 			else:
 				self.playlist = PlayList(PLAYLIST_VIDEO)
 				self.playlist.add(item, listitem)
 		elif self.playlist is not None:
-			self.index += 1
+			self.playlist.index += 1
 		# make sure we're initialized and pretend to play
 		# in case 'self' is actually a derived class
 		self.setup()
@@ -381,11 +385,12 @@ class PlayListItem(xbmcgui.ListItem):
 		"""Returns the filename of this PlayListItem."""
 		return self.data['path']
 
-class PlayList:
+class PlayList(UserList.UserList):
 
 	def __init__(self, type):
-		self.items = []
+		UserList.UserList.__init__(self)
 		self.type = type
+		self.index = -1
 
 	def PlayList(self, playlist):
 		"""retrieve a reference from a valid xbmc playlist."""
@@ -396,13 +401,15 @@ class PlayList:
 		print "**** PlayList.add ****", url, '' if listitem is None else listitem.data
 		if not isinstance(url, list):
 			url = [url]
+		if index is not None and self.index >= index:
+			self.index += len(url)
 		for u in url:
 			item = PlayListItem(u, listitem)
 			if index is not None:
-				self.items.insert(index, item)
+				self.data.insert(index, item)
 				index += 1
 			else:
-				self.items.append(PlayListItem(u, item))
+				self.data.append(PlayListItem(u, item))
 			xbmcplugin.setResolvedUrl(0, True, item)
 #			xbmcplugin.addDirectoryItem(0, u, item)
 
@@ -414,11 +421,14 @@ class PlayList:
 	def remove(self, filename):
 		"""remove an item with this filename from the playlist."""
 		print "**** PlayList.remove ****"
-		self.items.remove(filename)
+		if self.data.index(filename) < self.index:
+			self.index -= 1
+		self.data.remove(filename)
 
 	def clear(self):
 		"""clear all items in the playlist."""
-		self.items = []
+		self.data = []
+		self.index = -1
 
 	def shuffle(self):
 		"""shuffle the playlist."""
@@ -430,11 +440,13 @@ class PlayList:
 
 	def size(self):
 		"""returns the total number of PlayListItems in this playlist."""
-		return len(self.items)
+		return len(self.data)
 
 	def getposition(self):
 		"""returns the position of the current song in this playlist."""
-		pass
+		if self.index > len(self.data) - 1:
+			self.index = len(self.data) - 1
+		return self.index if self.index > 0 else 0
 
 
 # mock everything else
