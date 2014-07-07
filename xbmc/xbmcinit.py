@@ -24,7 +24,7 @@ except:
 	except: pass
 pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup%s' % got_soup), once=True)
 
-version = '0.3.10a'
+version = '0.3.10b'
 
 try: _special
 except NameError:
@@ -74,6 +74,8 @@ except NameError:
 	_special['videoplaylists'] = os.path.join(_special['profile'], 'playlists', 'video')
 #	_special['cdrips'] = #TODO: user-defined
 #	_special['skin'] = # ?
+
+	__builtin__.force_resolve = [x.strip() for x in os.getenv('force_resolve', '').split('\n')]
 
 def unesc(s):
 	return unescape(s, {"&apos;": "'", "&quot;": '"'})

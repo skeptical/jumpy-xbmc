@@ -231,6 +231,7 @@ def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 		return False
 	script = argv0
 	state = 0
+	id = None
 	if not isFolder:
 		if url.startswith('plugin://'):
 			id = xbmcinit.read_addon(urlparse(url).netloc)
@@ -242,6 +243,8 @@ def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 			return True
 	print "*** addDirectoryItem ***"
 	mediatype, name, thumb, mediainfo = resolve(url, listitem, isFolder)
+	if id and id in force_resolve:
+		mediatype = PMS_FOLDER
 	pms.addItem(state|mediatype, pms.esc(name), [script, url], thumb, mediainfo)
 	return True
 

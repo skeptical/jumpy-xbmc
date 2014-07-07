@@ -19,6 +19,7 @@ if len(sys.argv) == 1:
 		'_icon'  : '${home}/xbmc.png',
 		'_link'    : '[Readme](http://skeptical.github.io/jumpy/readme.html#XBMC)\n[Addons](http://wiki.xbmc.org/index.php?title=Category:All_add-ons)',
 		'_version' : xbmcinit.version,
+		'_conf'   : '${home}/xbmc/xbmc.conf',
 		'$xbmc.main.path' : (_special['xbmc'], 'path to xbmc program folder'),
 		'$xbmc.home.path' : (_special['home'], 'path to xbmc home folder')
 	})
@@ -31,6 +32,8 @@ if len(sys.argv) == 1:
 	print "home=%s\n" % home
 	addonsdb = os.path.join(_special['home'], 'userdata', 'Database', 'Addons15.db')
 	addonsdir = os.path.join(_special['home'], 'addons')
+
+	pms.setEnv('force_resolve', pms.readConf('xbmc.conf').get('force_resolve') or '')
 
 	# read the xbmc Addons db
 
