@@ -120,13 +120,13 @@ if len(sys.argv) == 1:
 					break
 
 else:
-	# the only purpose here is to ensure os,sys,jumpy,xbmcinit
+	# the only purpose here is to ensure os,sys,jumpy,xbmcinit,xbmc
 	# are loaded at addon startup
 	del sys.argv[0]
 	addondir = os.path.dirname(sys.argv[0])
 	os.chdir(addondir)
 	sys.path[0] = addondir
 	__file__ = sys.argv[0]
-	import xbmcinit
+	import xbmcinit, xbmc
 	execfile(__file__)
 
