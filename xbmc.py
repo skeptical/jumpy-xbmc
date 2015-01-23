@@ -15,13 +15,13 @@ if len(sys.argv) == 1:
 
 	pms.setInfo({
 		'_title' : 'jumpy-xbmc',
-		'_desc'  : 'Run your XBMC addons in ${PMS}.\n\nNo special setup required other than installing XBMC.',
-		'_icon'  : '${home}/xbmc.png',
-		'_link'    : '[Readme](http://skeptical.github.io/jumpy/readme.html#XBMC)\n[Addons](http://wiki.xbmc.org/index.php?title=Category:All_add-ons)',
+		'_desc'  : 'Run your XBMC/Kodi addons in ${PMS}.\n\nNo special setup required other than installing XBMC or Kodi.',
+		'_icon'  : '${home}/%s.png' % _special['xbmc_name'],
+		'_link'    : '[Readme](http://skeptical.github.io/jumpy/readme.html#XBMC)\n[Addons](http://kodi.wiki/view/Category:All_add-ons)',
 		'_version' : xbmcinit.version,
 		'_conf'   : '${home}/xbmc/xbmc.conf',
-		'$xbmc.main.path' : (_special['xbmc'], 'path to xbmc program folder'),
-		'$xbmc.home.path' : (_special['home'], 'path to xbmc home folder')
+		'$xbmc.main.path' : (_special['xbmc'], 'path to xbmc/kodi program folder'),
+		'$xbmc.home.path' : (_special['home'], 'path to xbmc/kodi home folder')
 	})
 
 	print '\njumpy-xbmc version %s\n' % xbmcinit.version
@@ -92,7 +92,7 @@ if len(sys.argv) == 1:
 			pms.addPath(os.path.pathsep.join(info['_pythonpath']))
 			script = os.path.join(info['path'], info['_script'])
 			thumb = os.path.join(info['path'], info['icon'])
-			pms.addItem(PMS_FOLDER, "[xbmc]   %s" % pms.esc(info['name']), \
+			pms.addItem(PMS_FOLDER, "[%s]   %s" % (_special['xbmc_name'], pms.esc(info['name'])), \
 				[sys.argv[0], script, 'plugin://' + id + '/'], thumb)
 		except KeyError: pass
 		except:

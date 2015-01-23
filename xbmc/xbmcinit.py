@@ -24,41 +24,65 @@ except:
 	except: pass
 pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup%s' % got_soup), once=True)
 
-version = '0.3.11'
+version = '0.3.11a'
+
+def resolve_xbmc():
+	xbmc_main = os.getenv('xbmc_main') if 'xbmc_main' in os.environ else pms.getProperty('xbmc.main.path')
+	if xbmc_main:
+		try:
+			name = re.compile(r'.*(KODI|kodi|XBMC|xbmc).*').match(xbmc_main).group(1)
+			return (name, xbmc_main)
+		except:
+			xbmc_main = None
+	if sys.platform.startswith('linux'):
+		for name in ['kodi', 'xbmc']:
+			# FIXME: this won't find xbmc if it's installed to another prefix
+			for d in ['/usr/local/share', '/usr/share']:
+				path = os.path.join(d, name)
+				if os.path.exists(path):
+					return (name, path)
+	elif sys.platform.startswith('win32'):
+		programfiles = (os.getenv('PROGRAMFILES(X86)') if 'PROGRAMFILES(X86)' in os.environ \
+			else os.getenv('PROGRAMFILES'))
+		for name in ['KODI', 'XBMC']:
+			path = os.path.join(programfiles, name)
+			if os.path.exists(path):
+				return (name, path)
+	elif sys.platform.startswith('darwin'):
+		for name in ['KODI', 'XBMC']:
+			path = os.path.join('/Applications/XBMC.app/Contents/Resources', name)
+			if os.path.exists(path):
+				return (name, path)
+	return (name, path)
 
 try: _special
 except NameError:
 	__builtin__._special = {}
-	xbmc_home = os.getenv('xbmc_home') if 'xbmc_home' in os.environ else pms.getProperty('xbmc.path')
-	xbmc_main = os.getenv('xbmc_main') if 'xbmc_main' in os.environ else pms.getProperty('xbmc.main.path')
+	xbmc_name, xbmc_main = resolve_xbmc()
+	xbmc_home = os.getenv('xbmc_home') if 'xbmc_home' in os.environ else pms.getProperty('xbmc.home.path')
+	if not xbmc_home:
+		xbmc_home = pms.getProperty('xbmc.path')
+	_special['xbmc'] = xbmc_main
+	_special['xbmc_name'] = xbmc_name.lower()
 	if sys.platform.startswith('linux'):
-		# FIXME: this won't find xbmc if it's installed to another prefix
-		_special['xbmc'] = xbmc_main if xbmc_main else \
-			('/usr/local/share/xbmc' if os.path.exists('/usr/local/share/xbmc') \
-			else '/usr/share/xbmc')
 		_special['xbmcbin'] = _special['xbmc'].replace('share', 'lib')
-		_special['home'] = xbmc_home if xbmc_home else os.getenv('HOME') + '/.xbmc'
+		_special['home'] = xbmc_home if xbmc_home else os.getenv('HOME') + '/.' + xbmc_name
 		_special['userhome'] = _special['home']
 		_special['temp'] = _special['home'] + '/temp'
 		_special['logpath'] = _special['temp']
 		os.environ['OS'] = 'linux'
 	elif sys.platform.startswith('win32'):
-		_special['xbmc'] = xbmc_main if xbmc_main else \
-			(os.getenv('PROGRAMFILES(X86)') if 'PROGRAMFILES(X86)' in os.environ \
-			else os.getenv('PROGRAMFILES')) + '\\XBMC'
 		_special['xbmcbin'] = _special['xbmc']
-		_special['home'] = xbmc_home if xbmc_home else os.getenv('APPDATA') + '\\XBMC'
+		_special['home'] = xbmc_home if xbmc_home else os.getenv('APPDATA') + '\\' + xbmc_name
 		_special['userhome'] = os.getenv('USERPROFILE')
 		_special['temp'] = _special['home'] + '\\cache'
 		_special['logpath'] = _special['home']
 		os.environ['OS'] = 'win32'
 	elif sys.platform.startswith('darwin'):
-		_special['xbmc'] = xbmc_main if xbmc_main else \
-			'/Applications/XBMC.app/Contents/Resources/XBMC'
 		_special['xbmcbin'] = _special['xbmc']
-		_special['home'] = xbmc_home if xbmc_home else os.getenv('HOME') + '/Library/Application Support/XBMC'
+		_special['home'] = xbmc_home if xbmc_home else os.getenv('HOME') + '/Library/Application Support/' + xbmc_name
 		_special['userhome'] = _special['home']
-		_special['temp'] = os.getenv('HOME') + '.xbmc/temp'
+		_special['temp'] = os.getenv('HOME') + '.' + xbmc_name + '/temp'
 		_special['logpath'] = os.getenv('HOME') + '/Library/Logs'
 		os.environ['OS'] = 'darwin'
 	mprofile = os.path.join(_special['home'], 'userdata')
