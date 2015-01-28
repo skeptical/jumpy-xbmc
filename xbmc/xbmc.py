@@ -417,7 +417,7 @@ class PlayList(UserList.UserList):
 
 	def load(self, filename):
 		"""Load a playlist."""
-		print "**** PlayList.load ****", url, filename
+		print "**** PlayList.load ****", filename
 		pass
 
 	def remove(self, filename):

@@ -1,5 +1,5 @@
-import __builtin__, os, sys, platform, atexit, traceback, re, pprint, jumpy
-import imp, types, marshal
+import __builtin__, os, sys, atexit, traceback, re, types, marshal
+import jumpy
 from xml.etree.ElementTree import ElementTree, fromstring
 from xml.dom.minidom import parseString
 from xml.sax.saxutils import escape, unescape

@@ -2,10 +2,7 @@ import sys, os, jumpy
 
 if len(sys.argv) == 1:
 
-	import traceback, re
-	import sqlite3
-	from cStringIO import StringIO
-	from ConfigParser import ConfigParser
+	import re, sqlite3, traceback
 
 	# set up
 

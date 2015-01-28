@@ -259,7 +259,6 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	url = listitem.getProperty('path')
 	if not succeeded or url is None or not (type(url) == str or type(url) == unicode):
 		return
-	media = getMediaType(listitem)
 
 	if '|' in url:
 		url,headers = url.split('|')
