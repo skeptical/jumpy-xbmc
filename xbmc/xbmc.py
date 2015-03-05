@@ -1,4 +1,4 @@
-import os.path, csv, traceback, zlib, UserList
+import os.path, csv, traceback, zlib, UserList, time
 from urlparse import urlparse
 from cStringIO import StringIO
 import xbmcplugin, xbmcgui, xbmcinit
@@ -101,9 +101,9 @@ def executeJSONRPC(jsonrpccommand):
 	"""Execute an JSONRPC command."""
 	return ""
 
-def sleep(time):
+def sleep(msec):
 	"""Sleeps for 'time' msec."""
-	pass
+	time.sleep(msec/1000)
 
 def getLocalizedString(id):
 	"""Returns a localized 'unicode string'."""
@@ -246,8 +246,8 @@ class Player:
 		# in case 'self' is actually a derived class
 		self.setup()
 		self.playing = True
-#		try: self.onPlayBackStarted()
-#		except: pass
+		try: self.onPlayBackStarted()
+		except: pass
 		try: self.onPlayBackEnded()
 		except: pass
 		self.playing = False
@@ -295,15 +295,18 @@ class Player:
 	def isPlaying(self):
 		"""returns True is xbmc is playing a file."""
 		self.setup()
-		return self.playing
+		# pretend to be playing only once per start
+		playing = self.playing
+		self.playing = false
+		return playing
 
 	def isPlayingAudio(self):
 		"""returns True is xbmc is playing an audio file."""
-		return True
+		return isPlaying(self)
 
 	def isPlayingVideo(self):
 		"""returns True if xbmc is playing a video."""
-		return True
+		return isPlaying(self)
 
 	def getPlayingFile(self):
 		"""returns the current playing file as a string."""
@@ -319,7 +322,7 @@ class Player:
 
 	def getTotalTime(self):
 		"""Returns the total time of the current playing media in"""
-		return 0
+		return self.getTime()
 
 	def getTime(self):
 		"""Returns the current time of the current playing media as fractional seconds."""
