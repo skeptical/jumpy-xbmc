@@ -362,6 +362,10 @@ def read_addon(id=None, dir=None, full=True):
 			except:
 				pass
 
+		addonlib = os.path.join(_info[id]['path'], 'resources', 'lib')
+		if os.path.exists(addonlib) and not addonlib in paths:
+			paths.append(addonlib)
+
 		try:
 			required = [a['addon'] for a in _info[id]['requires'][0]['import'] if not a['addon'].startswith('xbmc.')]
 		except:
