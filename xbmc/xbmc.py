@@ -182,12 +182,14 @@ def translatePath(url, asURL=False):
 #		print "scheme=%s loc=%s path=%s\nspecial[loc]=%s" % (scheme, loc, path,_special[loc])
 		if scheme == 'special' and loc in _special:
 			return ('file://' if asURL else '') \
-				+ os.path.join(_special[loc], os.path.normpath(path.lstrip('\\/')))
+				+ os.path.join(_special[loc], os.path.normpath(path.lstrip('\\/'))) \
+				+ (os.sep if path.endswith('/') else '')
 		if scheme == 'plugin':
 			dir = xbmcinit.get_addon_path(loc)
 			if dir:
 				return ('file://' if asURL else '') \
-					+ os.path.join(dir, os.path.normpath(path.lstrip('\\/')))
+					+ os.path.join(dir, os.path.normpath(path.lstrip('\\/'))) \
+					+ (os.sep if path.endswith('/') else '')
 	except:
 		pass
 	return url
