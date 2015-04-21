@@ -229,7 +229,7 @@ class Player:
 		if not 'playlist' in self.__dict__:
 			self.playlist = None
 		if not 'playing' in self.__dict__:
-			self.playing = False
+			self.playing = True
 
 	def play(self, item=None, listitem=None, windowed=None):
 		"""Play this item."""
@@ -297,7 +297,7 @@ class Player:
 		self.setup()
 		# pretend to be playing only once per start
 		playing = self.playing
-		self.playing = false
+		self.playing = False
 		return playing
 
 	def isPlayingAudio(self):
