@@ -450,11 +450,14 @@ def run_addon(pluginurl=None):
 	if not pluginurl:
 		pluginurl = jobs[0]
 		queued = True
-	else:
+	elif not pluginurl in jobs:
 		jobs.append(pluginurl)
 		if len(jobs) > 1:
 			print 'queueing: %s' % pluginurl
 			return
+	else:
+		# ignore duplicate jobs
+		return
 	url = pluginurl.encode('utf-8') if isinstance(pluginurl, unicode) else pluginurl
 	print '\nrun_addon%s: %s' % (' (queued)' if queued else '', url)
 	import xbmc, xbmcplugin
