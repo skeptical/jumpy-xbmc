@@ -6,6 +6,7 @@ from xml.sax.saxutils import escape, unescape
 from itertools import groupby
 from urlparse import urlparse
 from UserDict import IterableUserDict, DictMixin
+from importlib import import_module
 try: import simplejson as json
 except: import json
 
@@ -24,7 +25,7 @@ except:
 	except: pass
 pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup%s' % got_soup), once=True)
 
-version = '0.3.11f'
+version = '0.3.12'
 
 def resolve_xbmc():
 	xbmc_main = os.getenv('xbmc_main') if 'xbmc_main' in os.environ else pms.getProperty('xbmc.main.path')
@@ -426,6 +427,18 @@ def load_addon(id):
 	_addons[id] = (mod, codeobj)
 	return _addons[id]
 
+class mainImporter:
+	"""a finder to import __main__.foo as foo"""
+	def find_module(self, fullname, path=None):
+		return self if fullname and fullname[0:9] == '__main__.' else None
+
+	def load_module(self, fullname):
+		name = fullname[9:]
+		if name in sys.modules:
+			return sys.modules[name]
+		print 'importing %s as %s' % (fullname, name)
+		return import_module(name)
+
 # see also http://pyunit.sourceforge.net/notes/reloading.html
 #          http://www.indelible.org/ink/python-reloading/
 
@@ -442,10 +455,11 @@ class revertableDict(IterableUserDict):
 		self.revert()
 
 jobs = []
+importer = mainImporter()
 
 def run_addon(pluginurl=None):
 	# execute 'plugin://' urls, one at a time
-	global jobs
+	global jobs, importer
 	queued = False
 	if not pluginurl:
 		pluginurl = jobs[0]
@@ -482,8 +496,9 @@ def run_addon(pluginurl=None):
 		os.chdir(addondir)
 		mod, codeobj = load_addon(id)
 		xbmcplugin.setargv([mod.__file__, url])
-		sys.modules['__main__'] = mod
 		sys.modules = basemods
+		sys.modules['__main__'] = mod
+		sys.meta_path.append(importer)
 		exec codeobj in mod.__dict__
 	except:
 		print 'Error: run_addon'
@@ -496,6 +511,7 @@ def run_addon(pluginurl=None):
 			sys.modules[m.__name__] = m
 		os.chdir(home)
 		__builtin__._mainid = mainid
+		sys.meta_path.remove(importer)
 		sys.modules['__main__'] = main
 		sys.path = syspath
 		sys.argv = argv
