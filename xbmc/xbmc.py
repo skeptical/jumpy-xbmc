@@ -48,9 +48,23 @@ SERVER_ZEROCONF = 7
 
 abortRequested = False
 
+# added
+
+loglevel = LOGDEBUG
+
+def setloglevel(level):
+	global loglevel
+	l = loglevel
+	loglevel = level
+	return l
+
+# official api
+
 def log(msg, level=None):
 	"""Write a string to XBMC's log file."""
-	print msg
+	global loglevel
+	if level >= (loglevel if loglevel else LOGDEBUG):
+		print msg
 
 output = log # alias for backward compatility
 
