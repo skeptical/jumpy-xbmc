@@ -24,8 +24,10 @@ class Addon:
 	def getLocalizedString(self, id):
 		"""Returns an addon's localized 'unicode string'."""
 		key = str(id)
-#		assert key in self.strings, '%s not found in addon strings.' % key
-		return (self.strings[key] if key in self.strings else u'')
+		if key in self.strings:
+			return self.strings[key]
+		print '%s not found in addon strings.' % key
+		return u''
 
 	def getSetting(self, id):
 		"""Returns the value of a setting as a unicode string."""

@@ -25,7 +25,7 @@ except:
 	except: pass
 pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup%s' % got_soup), once=True)
 
-version = '0.3.13'
+version = '0.3.14-dev'
 
 def resolve_xbmc():
 	xbmc_main = os.getenv('xbmc_main') if 'xbmc_main' in os.environ else pms.getProperty('xbmc.main.path')
@@ -193,9 +193,10 @@ atexit.register(done)
 def read_strings(id, lang):
 	# lang folder name is usually title case, sometimes lowercase
 	for l in [lang, lang.title()]:
-		f = os.path.join(_info[id]['path'], 'resources', 'language', l, 'strings.xml')
-		if os.path.isfile(f):
-			print "Reading", f
+		f = os.path.join(_info[id]['path'], 'resources', 'language', l, 'strings')
+		if os.path.isfile(f + '.xml'):
+			f += '.xml'
+			print 'Reading', f
 			if got_soup:
 				xml = xmlsoup(f)
 				for tag in xml.findAll('string'):
@@ -207,6 +208,16 @@ def read_strings(id, lang):
 					for node in tag.childNodes:
 						frags.append(node.data)
 					_strings[id][tag.getAttribute('id')] = unesc(''.join(frags))
+		elif os.path.isfile(f + '.po'):
+			import polib, codecs
+			f += '.po'
+			print 'Reading', f
+			# polib throws a syntax error for comment hashtags without an immediate ensuing space, e.g. '#comment'
+			# however the pairs #~ #: #, ## #. #| are special and should be left intact
+			fixed_comment_po = re.sub(r'\n#([^ ~:,#.|])', r'\n# \1', codecs.open(f, encoding='utf-8').read())
+			for e in polib.pofile(fixed_comment_po):
+				_strings[id][e.msgctxt[1:]] = e.msgstr if e.msgstr else e.msgid
+
 
 def read_dialogs():
 	__builtin__._dialogs = {}
