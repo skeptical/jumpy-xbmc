@@ -132,6 +132,7 @@ def mediaInfo(listitem):
 	if 'duration' in m:
 		m['duration'] = str(m['duration']) + ('' if ':' in str(m['duration']) else ':00')
 	return m if m else None
+#	return m
 
 def resolve(url, listitem, isFolder=False):
 #	pprint.pprint(listitem.data.data)
@@ -266,8 +267,10 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 	if not succeeded or url is None or not (type(url) == str or type(url) == unicode):
 		return
 
-	if '|' in url:
-		url,headers = url.split('|')
+	details = {}
+	url,headers = xbmc.split_url_headers(url)
+	if headers:
+		details['headers'] = headers
 
 	if url.startswith('rtmp'):
 		if using_librtmp():
@@ -290,14 +293,19 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 		return
 
 	mediatype, name, thumb, mediainfo = resolve(url, listitem)
+
+	if mediainfo:
+		details['media'] = mediainfo
+
 	name = name + "" if stack < 1 else " %d" % stack
 
-	pms.addItem(mediatype, pms.esc(name), url, thumb, mediainfo)
+	pms.addItem(mediatype, pms.esc(name), url, thumb, details=details)
 	print "*** setResolvedUrl ***"
 	print "raw : %s" % listitem.getProperty('path')
 	print "name: %s" % name
 	print "type: %d" % mediatype
 	print "url :",url
+	print "details : %s" % details
 
 def endOfDirectory(handle, succeeded=None, updateListing=None, cacheToDisc=None):
 	"""Callback function to tell XBMC that the end of the directory listing in a virtualPythonFolder is reached."""

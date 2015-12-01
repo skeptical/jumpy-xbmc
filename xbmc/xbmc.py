@@ -1,4 +1,4 @@
-import os.path, csv, traceback, zlib, UserList, time
+import os.path, csv, traceback, zlib, UserList, time, urllib
 from urlparse import urlparse
 from cStringIO import StringIO
 import xbmcplugin, xbmcgui, xbmcinit
@@ -58,6 +58,15 @@ def setloglevel(level):
 	l = loglevel
 	loglevel = level
 	return l
+
+def split_url_headers(url):
+	headers = None
+	if '|' in url:
+		url,hdrs = url.split('|')
+		headers = {i[0]:urllib.unquote(i[1]) for i in (h.split('=') for h in hdrs.split('&'))}
+#		try: print '\n\nffplay -user-agent "%s" -cookies "%s" "%s"\n\n'%(headers['User-Agent'], urllib.unquote(headers['Cookie']), url)
+#		except: pass
+	return url, headers
 
 # official api
 
