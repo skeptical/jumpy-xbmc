@@ -25,7 +25,7 @@ except:
 	except: pass
 pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup%s' % got_soup), once=True)
 
-version = '0.3.14'
+version = '0.3.15-dev'
 
 def resolve_xbmc():
 	xbmc_main = os.getenv('xbmc_main') if 'xbmc_main' in os.environ else pms.getProperty('xbmc.main.path')
@@ -89,16 +89,17 @@ except NameError:
 	mprofile = os.path.join(_special['home'], 'userdata')
 	_special['masterprofile'] = mprofile
 	_special['profile'] = mprofile # FIXME: actually special://masterprofile/profile_name
-#	_special['subtitles'] = #TODO: user-defined
 	_special['userdata'] = mprofile
 	_special['database'] = os.path.join(mprofile, 'Database')
 	_special['thumbnails'] = os.path.join(mprofile, 'Thumbnails')
-#	_special['recordings'] = #TODO: user-defined
-#	_special['screenshots'] = #TODO: user-defined
 	_special['musicplaylists'] = os.path.join(_special['profile'], 'playlists', 'music')
 	_special['videoplaylists'] = os.path.join(_special['profile'], 'playlists', 'video')
-#	_special['cdrips'] = #TODO: user-defined
-#	_special['skin'] = # ?
+	_special['skin'] = os.path.join(_special['xbmc'], 'addons', 'skin.confluence')
+	# TODO: user-defined
+	#_special['subtitles']
+	#_special['recordings']
+	#_special['screenshots']
+	#_special['cdrips']
 
 	__builtin__.force_resolve = [x.strip() for x in os.getenv('force_resolve', '').split('\n')]
 
