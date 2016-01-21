@@ -29,11 +29,17 @@ def exists(path):
 
 def mkdir(path):
 	"""Create a folder."""
-	os.mkdir(translatePath(path))
+	try:
+		os.mkdir(translatePath(path))
+	except:
+		pass
 
 def mkdirs(path):
 	"""mkdirs(path) -- Create folder(s) - it will create all folders in the path."""
-	os.makedirs(translatePath(path))
+	try:
+		os.makedirs(translatePath(path))
+	except:
+		pass
 
 def rmdir(path):
 	"""Remove a folder."""
