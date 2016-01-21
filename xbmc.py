@@ -87,10 +87,11 @@ if len(sys.argv) == 1:
 			pms.addPath(None)
 			pms.addPath(home)
 			pms.addPath(os.path.pathsep.join(info['_pythonpath']))
+			print '[%s] %s'%(pms.esc(info['name']),os.path.pathsep.join(info['_pythonpath']))
 			script = os.path.join(info['path'], info['_script'])
 			thumb = os.path.join(info['path'], info['icon'])
 			pms.addItem(PMS_FOLDER, "[%s]   %s" % (_special['xbmc_name'], pms.esc(info['name'])), \
-				[sys.argv[0], script, 'plugin://' + id + '/'], thumb)
+				[XBMC_RUN, script, 'plugin://' + id + '/'], thumb)
 		except KeyError: pass
 		except:
 			traceback.print_exc(file=sys.stdout)
@@ -117,13 +118,15 @@ if len(sys.argv) == 1:
 					break
 
 else:
-	# the only purpose here is to ensure os,sys,jumpy,xbmcinit,xbmc
-	# are loaded at addon startup
+	# the only purpose here is to ensure os, sys, jumpy, xbmcinit, xbmc
+	# are loaded at addon startup and sys.argv is restructured to
+	# expected xbmc command format
 	del sys.argv[0]
 	addondir = os.path.dirname(sys.argv[0])
 	os.chdir(addondir)
 	sys.path[0] = addondir
 	__file__ = sys.argv[0]
 	import xbmcinit, xbmc
+#	print 'sys.argv: %s' % sys.argv
 	execfile(__file__)
 

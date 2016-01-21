@@ -79,7 +79,7 @@ def setargv(argv):
 	global argv0
 	argv0 = sys.argv[0]
 	# restructure args to xbmc command format, i.e.
-	#   'plugin://plugin.video.foo/ [window_id query_string]'
+	#   [plugin:// url, window_id, query_string]
 	if len(argv) > 1:
 		args = argv[1].split('?')
 		sys.argv = []
@@ -252,7 +252,7 @@ def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 	mediatype, name, thumb, mediainfo = resolve(url, listitem, isFolder)
 	if id and id in force_resolve:
 		mediatype = PMS_FOLDER
-	pms.addItem(state|mediatype, pms.esc(name), [script, url], thumb, mediainfo)
+	pms.addItem(state|mediatype, pms.esc(name), [XBMC_RUN, script, url], thumb, mediainfo)
 	return True
 
 def addDirectoryItems(handle, items, totalItems=None):

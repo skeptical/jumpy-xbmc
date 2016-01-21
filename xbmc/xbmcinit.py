@@ -10,6 +10,9 @@ from importlib import import_module
 try: import simplejson as json
 except: import json
 
+__builtin__.XBMC_RUN = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'xbmc.py')
+#pms.log('XBMC_RUN: %s'%XBMC_RUN)
+
 __builtin__.got_soup = False
 try:
 	from bs4 import BeautifulSoup
