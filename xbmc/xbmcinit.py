@@ -336,7 +336,7 @@ class addonDict(DictMixin):
 		# marshal also seems to work but may cause encoding issues with py4j
 		return (os.path.pathsep.join(paths), json.dumps(compressed) if compress else None)
 
-def read_addon(id=None, dir=None, full=True):
+def read_addon(id=None, dir=None, full=True, optional=False):
 
 	if id and id in _info and _info[id] is not None and \
 			(_info.flags[id] & COMPLETE or \
@@ -380,15 +380,15 @@ def read_addon(id=None, dir=None, full=True):
 			paths.append(addonlib)
 
 		try:
-			required = [a['addon'] for a in _info[id]['requires'][0]['import'] if not a['addon'].startswith('xbmc.')]
+			deps = [(a['addon'], a.get('optional')) for a in _info[id]['requires'][0]['import'] if not a['addon'].startswith('xbmc.')]
 		except:
-			required = []
+			deps = []
 
 		if not '_pythonpath' in _info[id]:
 			try:
 				# recurse through dep tree to gather PYTHONPATH
-				for dep in required:
-					if read_addon(id=dep, full=full) != None:
+				for dep, optional in deps:
+					if read_addon(id=dep, full=full, optional=optional) != None:
 						paths.extend(_info[dep]['_pythonpath'])
 						_info.flags[dep] |= REQUIRED
 				_info[id]['_pythonpath'] = list(set(paths))
@@ -396,7 +396,10 @@ def read_addon(id=None, dir=None, full=True):
 				traceback.print_exc(file=sys.stdout)
 
 		if full:
-			for i in [id] + required:
+			for i, optional in [(id, False)] + deps:
+				if not i in _info:
+					print '%s addon not found: %s' % ('optional' if optional else 'required', i)
+					continue
 				if not i in _settings:
 					read_settings(i)
 					_strings[i] = {}
@@ -407,7 +410,8 @@ def read_addon(id=None, dir=None, full=True):
 						read_strings(i, _settings['xbmc'][u'language'])
 			_info.flags[id] |= COMPLETE
 		return id
-	if id: print 'Error: %s not found.' % id
+	if id:
+		print '%s addon not found: %s' % ('optional' if optional else 'Error: required', id)
 	return None
 
 # see http://nedbatchelder.com/blog/200905/running_a_python_file_as_main_take_2.html
