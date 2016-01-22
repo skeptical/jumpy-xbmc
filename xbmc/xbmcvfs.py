@@ -1,4 +1,5 @@
 import os, shutil
+from stat import *
 from xbmc import translatePath
 
 def copy(source, destination):
@@ -49,7 +50,7 @@ def listdir(path):
 	"""listdir(path) -- lists content of a folder."""
 	return os.listdir(translatePath(path))
 
-class File:
+class File(object):
 
 	def __init__(self, path, mode='r'):
 		self.path = translatePath(path);
@@ -57,6 +58,9 @@ class File:
 
 	def read(self, n=-1):
 		return self.file.read(n)
+
+	def readBytes(numbytes):
+		return self.read(numbytes)
 
 	def write(self, b):
 		return self.file.write(b)
@@ -69,4 +73,39 @@ class File:
 
 	def close(self):
 		self.file.close()
+
+class Stat(object):
+	def __init__(path):
+		"""Get file or file system status."""
+		self.stat = os.stat(path)
+
+	def st_atime():
+		return self.stat[ST_ATIME]
+
+	def st_ctime():
+		return self.stat[ST_CTIME]
+
+	def st_dev():
+		return self.stat[ST_DEV]
+
+	def st_gid():
+		return self.stat[ST_GID]
+
+	def st_ino():
+		return self.stat[ST_INO]
+
+	def st_mode():
+		return self.stat[ST_MODE]
+
+	def st_mtime():
+		return self.stat[ST_MTIME]
+
+	def st_nlink():
+		return self.stat[ST_NLINK]
+
+	def st_size():
+		return self.stat[ST_SIZE]
+
+	def st_uid():
+		return self.stat[ST_UID]
 
