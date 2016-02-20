@@ -62,8 +62,8 @@ def setloglevel(level):
 def split_url_headers(url):
 	headers = None
 	if '|' in url:
-		url,hdrs = url.split('|')
-		headers = {i[0]:urllib.unquote(i[1]) for i in (h.split('=') for h in hdrs.split('&'))}
+		url,hdrs = url.split('|', 1)
+		headers = {i[0]:urllib.unquote(i[1]) for i in (h.split('=', 1) for h in hdrs.split('&', 1))}
 #		try: print '\n\nffplay -user-agent "%s" -cookies "%s" "%s"\n\n'%(headers['User-Agent'], urllib.unquote(headers['Cookie']), url)
 #		except: pass
 	return url, headers
