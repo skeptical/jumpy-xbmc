@@ -28,7 +28,7 @@ except:
 	except: pass
 pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup%s' % got_soup), once=True)
 
-version = '0.3.15'
+version = '0.3.16'
 
 def resolve_xbmc():
 	xbmc_main = os.getenv('xbmc_main') if 'xbmc_main' in os.environ else pms.getProperty('xbmc.main.path')
@@ -505,7 +505,7 @@ def run_addon(pluginurl=None):
 	basemods = revertableDict(sys.modules)
 	# pull any state-sensitive modules to force re-import
 	sensitives = [sys.modules.pop(m) for m in [
-			'urllib', 'urllib2', 'cookielib'
+			'urllib', 'urllib2', 'cookielib', 'logging'
 		] if m in sys.modules]
 	try:
 		# reset and run
