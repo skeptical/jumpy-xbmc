@@ -28,7 +28,7 @@ except:
 	except: pass
 pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup%s' % got_soup), once=True)
 
-version = '0.3.16'
+version = '0.3.17-dev'
 
 def resolve_xbmc():
 	xbmc_main = os.getenv('xbmc_main') if 'xbmc_main' in os.environ else pms.getProperty('xbmc.main.path')
@@ -196,7 +196,7 @@ atexit.register(done)
 
 def read_strings(id, lang):
 	# lang folder name is usually title case, sometimes lowercase
-	for l in [lang, lang.title()]:
+	for l in [lang, lang.title(), lang.lower()]:
 		f = os.path.join(_info[id]['path'], 'resources', 'language', l, 'strings')
 		if os.path.isfile(f + '.xml'):
 			f += '.xml'

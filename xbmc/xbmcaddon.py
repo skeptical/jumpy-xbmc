@@ -27,6 +27,8 @@ class Addon:
 		if key in self.strings:
 			return self.strings[key]
 		print '%s not found in addon strings.' % key
+		from pprint import pprint
+		pprint(self.strings)
 		return u''
 
 	def getSetting(self, id):
