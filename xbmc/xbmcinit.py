@@ -446,6 +446,33 @@ def load_addon(id):
 	_addons[id] = (mod, codeobj)
 	return _addons[id]
 
+class case_insensitive_dict(DictMixin):
+	def __init__(self, data=None):
+		self.data = {}
+		if data:
+			self.update(data)
+
+	def __getitem__(self, key):
+		return self.data[key.lower()]
+
+	def __setitem__(self, key, item):
+		if type(item) is dict:
+			item = case_insensitive_dict(item)
+		self.data[key.lower()] = item
+
+	def __delitem__(self, key):
+		if key.lower() in self.data:
+			del self.data[key.lower()]
+		else:
+			raise KeyError(key)
+
+	def keys(self):
+		return self.data.keys()
+
+	# simplejson 'magic' method
+	def _asdict(self):
+		return self.data
+
 class mainImporter:
 	"""a finder to import __main__.foo as foo"""
 	def find_module(self, fullname, path=None):
@@ -550,6 +577,10 @@ def reset(id=None):
 		sys.path = mainpath + sys.path + extrapaths
 		print ""
 		print "Settings:", _settings[_mainid]
+		if 'USERDATA' in os.environ:
+			infolabels = case_insensitive_dict(json.loads(os.environ.pop('USERDATA')))
+			_info[_mainid]['infolabels'] = infolabels
+			print "InfoLabels: %s"%(_info[_mainid]['infolabels'].data)
 
 try: _settings
 except NameError:

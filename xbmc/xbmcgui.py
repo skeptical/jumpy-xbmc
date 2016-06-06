@@ -1,4 +1,5 @@
-from UserDict import DictMixin
+try: import simplejson as json
+except: import json
 import xbmcinit
 
 def getCurrentWindowId():
@@ -321,31 +322,11 @@ REMOTE_7 = 65
 REMOTE_8 = 66
 REMOTE_9 = 67
 
-class case_insensitive_dict(DictMixin):
-	def __init__(self):
-		self.data = {}
-
-	def __getitem__(self, key):
-		return self.data[key.lower()]
-
-	def __setitem__(self, key, item):
-		self.data[key.lower()] = item
-
-	def __delitem__(self, key):
-		if key.lower() in self.data:
-			del self.data[key.lower()]
-		else:
-			raise KeyError(key)
-
-	def keys(self):
-		return self.data.keys()
-
-
 # xbmc/interfaces/python/xbmcmodule/listitem.cpp
 class ListItem:
 
 	def __init__(self, label=None, label2=None, iconImage=None, thumbnailImage=None, path=None):
-		self.data = case_insensitive_dict()
+		self.data = xbmcinit.case_insensitive_dict()
 		self.data['label'] = label
 		self.data['label2'] = label2
 		self.data['iconImage'] = iconImage
@@ -446,6 +427,10 @@ class ListItem:
 		"""Sets subtitles for this listitem."""
 		self.data['subtitles'] = subtitles
 
+	# added
+	def stringify(self):
+#		return json.dumps({'ListItem': self.data})   # requires simplejson
+		return json.dumps({'ListItem': self.data}, default=lambda o: o._asdict()) # plain json
 
 # xbmc/interfaces/python/xbmcmodule/dialog.cpp
 class Dialog:

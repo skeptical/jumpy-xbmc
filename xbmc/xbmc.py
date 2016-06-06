@@ -160,10 +160,16 @@ def getCpuTemp():
 # xbmc/GUIInfoManager.cpp
 def getInfoLabel(infotag):
 	"""Returns an InfoLabel as a string."""
+	info = "0" # parses as string/number
 	if infotag == 'System.BuildVersion':
-		return "12.0"
-	# string/number
-	return "0"
+		info = "12.0"
+	else:
+		cat, key = infotag.split('.', 2)
+		try:
+			info = _info[_mainid]['infolabels'][cat][key]
+		except: pass
+	print '**** getInfoLabel **** %s: %s' % (infotag, info)
+	return info
 
 def getInfoImage(infotag):
 	"""Returns a filename including path to the InfoImage's"""

@@ -252,7 +252,7 @@ def addDirectoryItem(handle, url, listitem, isFolder=False, totalItems=None):
 	mediatype, name, thumb, mediainfo = resolve(url, listitem, isFolder)
 	if id and id in force_resolve:
 		mediatype = PMS_FOLDER
-	pms.addItem(state|mediatype, pms.esc(name), [XBMC_RUN, script, url], thumb, mediainfo)
+	pms.addItem(state|mediatype, pms.esc(name), [XBMC_RUN, script, url], thumb, mediainfo, listitem.stringify() if listitem else None)
 	return True
 
 def addDirectoryItems(handle, items, totalItems=None):
@@ -298,14 +298,16 @@ def setResolvedUrl(handle, succeeded, listitem, stack=-1):
 		details['media'] = mediainfo
 
 	name = name + "" if stack < 1 else " %d" % stack
+	data = listitem.stringify() if listitem else None
 
-	pms.addItem(mediatype, pms.esc(name), url, thumb, details=details)
+	pms.addItem(mediatype, pms.esc(name), url, thumb, details=details, data=data)
 	print "*** setResolvedUrl ***"
 	print "raw : %s" % listitem.getProperty('path')
 	print "name: %s" % name
 	print "type: %d" % mediatype
 	print "url :",url
 	print "details : %s" % details
+	print "data : %s" % data
 
 def endOfDirectory(handle, succeeded=None, updateListing=None, cacheToDisc=None):
 	"""Callback function to tell XBMC that the end of the directory listing in a virtualPythonFolder is reached."""
