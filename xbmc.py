@@ -7,8 +7,6 @@ if len(sys.argv) == 1:
 	# set up
 
 	import xbmc.xbmcinit as xbmcinit
-	pms.setEnv('xbmc_main', _special['xbmc'])
-	pms.setEnv('xbmc_home', _special['home'])
 
 	pms.setInfo({
 		'_title' : 'jumpy-xbmc',

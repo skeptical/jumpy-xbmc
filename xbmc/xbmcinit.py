@@ -30,14 +30,16 @@ pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup
 
 version = '0.3.17-dev'
 
-def resolve_xbmc():
-	xbmc_main = os.getenv('xbmc_main') if 'xbmc_main' in os.environ else pms.getProperty('xbmc.main.path')
-	if xbmc_main:
+def find_xbmc():
+	path = pms.getProperty('xbmc.main.path')
+	if path and path.strip():
 		try:
-			name = re.compile(r'.*(KODI|kodi|XBMC|xbmc).*').match(xbmc_main).group(1)
-			return (name, xbmc_main)
+			name = re.compile(r'.*(kodi|xbmc).*', re.IGNORECASE).match(path).group(1)
+			if os.path.exists(path):
+				return (name, path)
 		except:
-			xbmc_main = None
+			traceback.print_exc(file=sys.stdout)
+			path = None
 	if sys.platform.startswith('linux'):
 		for name in ['kodi', 'xbmc']:
 			# FIXME: this won't find xbmc if it's installed to another prefix
@@ -59,12 +61,13 @@ def resolve_xbmc():
 				return (name, path)
 	return (name, path)
 
-try: _special
-except NameError:
-	__builtin__._special = {}
-	xbmc_name, xbmc_main = resolve_xbmc()
+def resolve_xbmc():
+	xbmc_name, xbmc_main = find_xbmc()
 	xbmc_home = os.getenv('xbmc_home') if 'xbmc_home' in os.environ else pms.getProperty('xbmc.home.path')
+	if xbmc_home:
+		xbmc_home = xbmc_home.strip()
 	if not xbmc_home:
+		# backwards compatibility
 		xbmc_home = pms.getProperty('xbmc.path')
 	_special['xbmc'] = xbmc_main
 	_special['xbmc_name'] = xbmc_name.lower()
@@ -74,21 +77,21 @@ except NameError:
 		_special['userhome'] = _special['home']
 		_special['temp'] = _special['home'] + '/temp'
 		_special['logpath'] = _special['temp']
-		os.environ['OS'] = 'linux'
+#		os.environ['OS'] = 'linux'
 	elif sys.platform.startswith('win32'):
 		_special['xbmcbin'] = _special['xbmc']
 		_special['home'] = xbmc_home if xbmc_home else os.getenv('APPDATA') + '\\' + xbmc_name
 		_special['userhome'] = os.getenv('USERPROFILE')
 		_special['temp'] = _special['home'] + '\\cache'
 		_special['logpath'] = _special['home']
-		os.environ['OS'] = 'win32'
+#		os.environ['OS'] = 'win32'
 	elif sys.platform.startswith('darwin'):
 		_special['xbmcbin'] = _special['xbmc']
 		_special['home'] = xbmc_home if xbmc_home else os.getenv('HOME') + '/Library/Application Support/' + xbmc_name
 		_special['userhome'] = _special['home']
 		_special['temp'] = os.getenv('HOME') + '.' + xbmc_name + '/temp'
 		_special['logpath'] = os.getenv('HOME') + '/Library/Logs'
-		os.environ['OS'] = 'darwin'
+#		os.environ['OS'] = 'darwin'
 	mprofile = os.path.join(_special['home'], 'userdata')
 	_special['masterprofile'] = mprofile
 	_special['profile'] = mprofile # FIXME: actually special://masterprofile/profile_name
@@ -104,6 +107,26 @@ except NameError:
 	#_special['screenshots']
 	#_special['cdrips']
 
+
+try: _special
+except NameError:
+	__builtin__._special = {}
+	setenv = False
+	if 'xbmc_special' in os.environ:
+		xbmc_special = os.environ['xbmc_special']
+	else:
+		xbmc_special = pms.getVar('xbmc_special')
+		setenv = True
+	if xbmc_special:
+		try: __builtin__._special = json.loads(xbmc_special)
+		except: traceback.print_exc(file=sys.stdout)
+	if not _special:
+		resolve_xbmc()
+		xbmc_special = json.dumps(_special)
+		pms.setVar('xbmc_special', xbmc_special)
+		setenv = True
+	if setenv:
+		pms.setEnv('xbmc_special', xbmc_special)
 	__builtin__.force_resolve = [x.strip() for x in os.getenv('force_resolve', '').split('\n')]
 
 def unesc(s):
