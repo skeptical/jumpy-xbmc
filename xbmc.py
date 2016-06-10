@@ -85,7 +85,7 @@ if len(sys.argv) == 1:
 			pms.addPath(None)
 			pms.addPath(home)
 			pms.addPath(os.path.pathsep.join(info['_pythonpath']))
-			print '[%s] %s'%(pms.esc(info['name']),os.path.pathsep.join(info['_pythonpath']))
+#			print '[%s] %s'%(pms.esc(info['name']),os.path.pathsep.join(info['_pythonpath']))
 			script = os.path.join(info['path'], info['_script'])
 			thumb = os.path.join(info['path'], info['icon'])
 			pms.addItem(PMS_FOLDER, "[%s]   %s" % (_special['xbmc_name'], pms.esc(info['name'])), \

@@ -28,7 +28,7 @@ except:
 	except: pass
 pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup%s' % got_soup), once=True)
 
-version = '0.3.17-dev'
+version = '0.3.17b-dev'
 
 def find_xbmc():
 	path = pms.getProperty('xbmc.main.path')
@@ -505,7 +505,7 @@ class mainImporter:
 		name = fullname[9:]
 		if name in sys.modules:
 			return sys.modules[name]
-		print 'importing %s as %s' % (fullname, name)
+		print 'importing %s as %s' % (name, fullname)
 		return import_module(name)
 
 # see also http://pyunit.sourceforge.net/notes/reloading.html
