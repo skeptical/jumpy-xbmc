@@ -10,6 +10,8 @@ class Addon:
 		xid = xbmcinit.read_addon(id)
 		if xid is not None:
 			self._id = xid
+		elif id is None and 'addon_id' in os.environ:
+			self._id = xbmcinit.read_addon(os.environ['addon_id'])
 		elif id is not None:
 			self._id = id
 			_info[self._id] = {}

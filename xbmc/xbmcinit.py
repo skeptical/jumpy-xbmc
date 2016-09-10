@@ -28,7 +28,7 @@ except:
 	except: pass
 pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup%s' % got_soup), once=True)
 
-version = '0.3.17b-dev'
+version = '0.3.17c-dev'
 
 def find_xbmc():
 	path = pms.getProperty('xbmc.main.path')
@@ -617,7 +617,7 @@ except NameError:
 
 try: _mainid
 except NameError:
-	reset()
+	reset(os.environ.get('addon_id', None))
 
 class mock(object):
 	'''
