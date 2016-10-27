@@ -28,7 +28,7 @@ except:
 	except: pass
 pms.log('using %s to parse xml' % ('minidom' if not got_soup else 'beautifulsoup%s' % got_soup), once=True)
 
-version = '0.3.17c-dev'
+version = '0.3.17'
 
 def find_xbmc():
 	path = pms.getProperty('xbmc.main.path')
